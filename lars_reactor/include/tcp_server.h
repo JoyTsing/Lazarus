@@ -5,10 +5,10 @@
 
 #include <cstdint>
 
-class tcp_server {
+class TcpServer {
  public:
-  tcp_server(const char* ip, std::uint16_t port);
-  ~tcp_server();
+  TcpServer(const char* ip, std::uint16_t port);
+  ~TcpServer();
   void do_accept();
 
  private:

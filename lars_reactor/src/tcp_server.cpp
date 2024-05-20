@@ -9,9 +9,7 @@
 #include <cstring>
 #include <iostream>
 
-void lars_hello() { std::cout << "lars hello" << std::endl; }
-
-tcp_server::tcp_server(const char *ip, std::uint16_t port) {
+TcpServer::TcpServer(const char *ip, std::uint16_t port) {
   bzero(&_connection_addr, sizeof(_connection_addr));
   // 忽略一些信号 SIGHUP, SIGPIPE
   // SIGPIPE:如果客户端关闭，服务端再次write就会产生
@@ -58,9 +56,9 @@ tcp_server::tcp_server(const char *ip, std::uint16_t port) {
   }
 }
 
-tcp_server::~tcp_server() { close(_sockfd); }
+TcpServer::~TcpServer() { close(_sockfd); }
 
-void tcp_server::do_accept() {
+void TcpServer::do_accept() {
   int connection_fd;
   while (true) {
     // 1 accept

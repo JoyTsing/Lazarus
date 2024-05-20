@@ -2,9 +2,9 @@
 
 // buf_pool存储的单元
 
-class io_buf {
+class IOBuffer {
  public:
-  io_buf(int capacity);
+  IOBuffer(int capacity);
 
   void clear();
   /**
@@ -20,11 +20,11 @@ class io_buf {
    */
   void adjust();
 
-  void copy(const io_buf* src);
+  void copy(const IOBuffer* src);
 
-  int capacity;  // buf的容积大小
-  int length;    // buf中已经存储的数据大小
-  int head;      // buf中未处理数据的起始位置
-  char* data;    // buf的数据
-  io_buf* next;  // 下一个io_buf
+  int capacity;    // buf的容积大小
+  int length;      // buf中已经存储的数据大小
+  int head;        // buf中未处理数据的起始位置
+  char* data;      // buf的数据
+  IOBuffer* next;  // 下一个io_buf
 };
