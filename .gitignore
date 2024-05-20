@@ -35,5 +35,9 @@
 *.out
 *.app
 
+#user-settins
+.vscode
+.cache
+compile_commands.json
 lars_reactor_test
 # End of https://www.toptal.com/developers/gitignore/api/c++
