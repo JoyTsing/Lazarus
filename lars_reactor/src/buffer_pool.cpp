@@ -56,6 +56,7 @@ IOBuffer* BufferPool::alloc_buffer(int size) {
   } else if (size <= mem_cap_to_int(MEM_CAP::m8M)) {
     mem_size = mem_cap_to_int(MEM_CAP::m8M);
   } else {
+    std::cerr << "too larger size for buffer pool\n";
     return nullptr;
   }
 

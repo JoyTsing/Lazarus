@@ -9,4 +9,4 @@ all:
 	$(CXX) -o lars_reactor_test $(CFLAGS)  lars_reactor.cpp $(INC) $(LIB)
 
 clean:
-	-rm -f *.o lars_reactor
+	-rm -f *.o lars_reactor_test
