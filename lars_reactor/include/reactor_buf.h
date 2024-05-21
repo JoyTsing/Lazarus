@@ -22,11 +22,23 @@ class ReactorBuffer {
 // 读buffer
 class InputBuffer : public ReactorBuffer {
  public:
+  /**
+   * @brief 从指定的socket中读数据，-1表示错误
+   *
+   * @param fd
+   * @return int
+   */
   int read_data(int fd);
 
-  const char* data();
   /**
-   * @brief 重置缓冲区
+   * @brief 返回缓冲区的数据
+   *
+   * @return const char*
+   */
+  const char* data();
+
+  /**
+   * @brief 将缓冲区已读取数据剔除，需要配合pop使用
    *
    */
   void adjust();

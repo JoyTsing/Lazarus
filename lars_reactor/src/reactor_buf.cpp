@@ -15,7 +15,7 @@ ReactorBuffer::ReactorBuffer() : _buffer(nullptr) {}
 ReactorBuffer::~ReactorBuffer() { clear(); }
 
 void ReactorBuffer::pop(int len) {
-  if (_buffer != nullptr && len <= _buffer->length) {
+  if ((_buffer != nullptr && len <= _buffer->length) || len == 0) {
     return;
   }
   _buffer->pop(length());
@@ -43,6 +43,10 @@ int InputBuffer::read_data(int fd) {
   if (ioctl(fd, FIONREAD, &need_read) == -1) {
     std::cerr << "ioctl error\n";
     return -1;
+  }
+
+  if (need_read == 0) {
+    return 0;
   }
 
   if (_buffer == nullptr) {
@@ -116,6 +120,9 @@ int OutputBuffer::write_to(int fd) {
 }
 
 int OutputBuffer::add_data(const char* data, int len) {
+  if (len == 0) {
+    return 0;
+  }
   if (_buffer == nullptr) {
     _buffer = BufferPool::instance()->alloc_buffer(len);
     if (_buffer == nullptr) {

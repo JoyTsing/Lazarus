@@ -15,6 +15,9 @@ void IOBuffer::clear() {
 }
 
 void IOBuffer::pop(int len) {
+  if (len == 0) {
+    return;
+  }
   head += len;
   length -= len;
 }

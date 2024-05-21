@@ -2,12 +2,15 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <strings.h>
 #include <sys/socket.h>
 
 #include <cerrno>
 #include <csignal>
 #include <cstring>
 #include <iostream>
+
+#include "reactor_buf.h"
 
 TcpServer::TcpServer(const char *ip, std::uint16_t port) {
   bzero(&_connection_addr, sizeof(_connection_addr));
@@ -74,22 +77,47 @@ void TcpServer::do_accept() {
       } else if (errno == EMFILE) {
         // 链接过多了
         std::cerr << "tcp::server accept() error EMFILE\n";
-        continue;
       } else {
         std::cerr << "tcp::server accept() error\n";
         exit(1);
       }
-    }
-    // TODO heartbeat
-    // TODO mq
-    //  2 echo
-    const char *data = "hello client\n";
-    int written = 0;
-    do {
-      written = write(connection_fd, data, strlen(data) + 1);
-    } while (written == -1 && errno == EINTR);  // 非阻塞失败
-    if (written > 0) {
-      std::cout << "write success\n";
+    } else {
+      int read_len = 0;
+      InputBuffer input_buffer;
+      OutputBuffer output_buffer;
+      char *message;
+      int message_len;
+      // echo
+      do {
+        // 客户端数据读到InputBuffer
+        read_len = input_buffer.read_data(connection_fd);
+        if (read_len == -1) {
+          std::cerr << "TcpServer read_data() error\n";
+          break;
+        }
+        std::cout << "read_len = " << read_len << "\n";
+        message_len = input_buffer.length();
+        message = new char[message_len];
+        bzero(message, message_len);
+        memcpy(message, input_buffer.data(), message_len);
+        //  buffer已读取的数据剔除
+        input_buffer.pop(message_len);
+        input_buffer.adjust();
+        std::cout << "server recv data = " << message << "\n ";
+        // 数据写到OutputBuffer
+        output_buffer.add_data(message, message_len);
+        while (output_buffer.length()) {
+          int written = output_buffer.write_to(connection_fd);
+          if (written == -1) {
+            std::cerr << " TcpServer write_to() error\n";
+          } else if (written == 0) {
+            // fd不可写,等待下次写
+            continue;
+          }
+        }
+        delete[] message;
+      } while (read_len != 0);
+      close(connection_fd);
     }
   }
 }
