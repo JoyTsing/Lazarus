@@ -15,12 +15,13 @@ ReactorBuffer::ReactorBuffer() : _buffer(nullptr) {}
 ReactorBuffer::~ReactorBuffer() { clear(); }
 
 void ReactorBuffer::pop(int len) {
-  if ((_buffer != nullptr && len <= _buffer->length) || len == 0) {
+  if (_buffer == nullptr || len > _buffer->length) {
     return;
   }
   _buffer->pop(length());
   if (_buffer->length == 0) {
     clear();
+    _buffer = nullptr;  // 空数据的时候也能清空
   }
 }
 
@@ -39,14 +40,10 @@ int ReactorBuffer::length() {
 }
 
 int InputBuffer::read_data(int fd) {
-  int need_read = 0;
+  int need_read;
   if (ioctl(fd, FIONREAD, &need_read) == -1) {
     std::cerr << "ioctl error\n";
     return -1;
-  }
-
-  if (need_read == 0) {
-    return 0;
   }
 
   if (_buffer == nullptr) {
@@ -54,20 +51,20 @@ int InputBuffer::read_data(int fd) {
     if (_buffer == nullptr) {
       return -1;
     }
-  }
-  // 当前的buffer不够存了
-  assert(_buffer->head == 0);
-  if (_buffer->capacity - _buffer->length < need_read) {
-    IOBuffer* new_buffer =
-        BufferPool::instance()->alloc_buffer(need_read + _buffer->length);
-    if (new_buffer == nullptr) {
-      return -1;
+  } else {
+    // 当前的buffer不够存了
+    assert(_buffer->head == 0);
+    if (_buffer->capacity - _buffer->length < (int)need_read) {
+      IOBuffer* new_buffer =
+          BufferPool::instance()->alloc_buffer(need_read + _buffer->length);
+      if (new_buffer == nullptr) {
+        return -1;
+      }
+      new_buffer->copy(_buffer);
+      BufferPool::instance()->revert(_buffer);  // 放回
+      _buffer = new_buffer;
     }
-    new_buffer->copy(_buffer);
-    BufferPool::instance()->revert(_buffer);  // 放回
-    _buffer = new_buffer;
   }
-
   // 读数据
   int read_len = 0;
   do {
@@ -120,26 +117,24 @@ int OutputBuffer::write_to(int fd) {
 }
 
 int OutputBuffer::add_data(const char* data, int len) {
-  if (len == 0) {
-    return 0;
-  }
   if (_buffer == nullptr) {
     _buffer = BufferPool::instance()->alloc_buffer(len);
     if (_buffer == nullptr) {
       return -1;
     }
-  }
-  // 当前的buffer不够存了
-  assert(_buffer->head == 0);
-  if (_buffer->capacity - _buffer->length < len) {
-    IOBuffer* new_buffer =
-        BufferPool::instance()->alloc_buffer(len + _buffer->length);
-    if (new_buffer == nullptr) {
-      return -1;
+  } else {
+    // 当前的buffer不够存了
+    assert(_buffer->head == 0);
+    if (_buffer->capacity - _buffer->length < len) {
+      IOBuffer* new_buffer =
+          BufferPool::instance()->alloc_buffer(len + _buffer->length);
+      if (new_buffer == nullptr) {
+        return -1;
+      }
+      new_buffer->copy(_buffer);
+      BufferPool::instance()->revert(_buffer);  // 放回
+      _buffer = new_buffer;
     }
-    new_buffer->copy(_buffer);
-    BufferPool::instance()->revert(_buffer);  // 放回
-    _buffer = new_buffer;
   }
   // 将新数据拼接到之前的数据之后
   memcpy(_buffer->data + _buffer->length, data, len);

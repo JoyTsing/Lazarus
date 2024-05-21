@@ -62,8 +62,8 @@ IOBuffer* BufferPool::alloc_buffer(int size) {
 
   // 检查内存池中是否有足够的内存,没有则申请
   std::lock_guard<std::mutex> lock(_mutex);
-  [[unlikely]] if (_pool[mem_size] == nullptr) {
-    if (_total_mem + mem_size > MEM_LIMIT) {
+  if (_pool[mem_size] == nullptr) {
+    [[unlikely]] if (_total_mem + mem_size >= MEM_LIMIT) {
       std::cerr << "buffer pool no enough memory\n";
       return nullptr;
     }

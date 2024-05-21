@@ -15,23 +15,21 @@ void IOBuffer::clear() {
 }
 
 void IOBuffer::pop(int len) {
-  if (len == 0) {
-    return;
-  }
   head += len;
   length -= len;
 }
 
 void IOBuffer::adjust() {
-  length -= head;
-  if (length > 0) {
-    memmove(data, data + head, length);
+  if (head != 0) {
+    if (length != 0) {
+      memmove(data, data + head, length);
+    }
+    head = 0;
   }
-  head = 0;
 }
 
 void IOBuffer::copy(const IOBuffer* src) {
+  memcpy(data, src->data + src->head, src->length);
   length = src->length;
   head = 0;
-  memcpy(data, src->data + src->head, src->length);
 }

@@ -28,7 +28,7 @@ class BufferPool {
   BufferPool& operator=(const BufferPool&) = delete;
 
   static BufferPool* instance() {
-    static BufferPool* _instance;
+    static BufferPool* _instance = new BufferPool();
     return _instance;
   }
 

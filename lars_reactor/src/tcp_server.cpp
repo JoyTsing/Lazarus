@@ -97,7 +97,7 @@ void TcpServer::do_accept() {
         }
         std::cout << "read_len = " << read_len << "\n";
         message_len = input_buffer.length();
-        message = new char[message_len];
+        message = (char *)malloc(message_len);
         bzero(message, message_len);
         memcpy(message, input_buffer.data(), message_len);
         //  buffer已读取的数据剔除
@@ -115,7 +115,7 @@ void TcpServer::do_accept() {
             continue;
           }
         }
-        delete[] message;
+        free(message);
       } while (read_len != 0);
       close(connection_fd);
     }
