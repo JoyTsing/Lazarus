@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <strings.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 
 #include <cerrno>
@@ -16,6 +17,63 @@
 void accept_callback(EventLoop *el, int fd, void *args) {
   TcpServer *server = (TcpServer *)args;
   server->do_accept();
+}
+
+// 测试用的首发消息结构体
+struct Message {
+  int len;
+  char buf[4096];
+};
+
+void server_read_callback(EventLoop *el, int fd, void *args);
+
+void server_write_callback(EventLoop *el, int fd, void *args) {
+  Message *message = (Message *)args;
+  // 写回数据
+  OutputBuffer output_buf;
+  output_buf.add_data(message->buf, message->len);
+  while (output_buf.length()) {
+    int write_len = output_buf.write_to(fd);
+    if (write_len == -1) {
+      std::cerr << "write error\n";
+      return;
+    } else if (write_len == 0) {
+      // 不可写
+      break;
+    }
+  }
+  // 写完了，注册读事件
+  el->del_io_event(fd, EPOLLOUT);
+  el->add_io_event(fd, EPOLLIN, server_read_callback, message);
+}
+
+// 客户端connect成功后，注册的读回调函数
+void server_read_callback(EventLoop *el, int fd, void *args) {
+  Message *message = (Message *)args;
+  // 读取数据
+  InputBuffer input_buf;
+  int read_len = input_buf.read_data(fd);
+  if (read_len == -1 || read_len == 0) {
+    std::cerr << "close\n";
+    // 删除事件
+    el->del_io_event(fd);
+    close(fd);
+    return;
+  }
+  // 读取成功
+  std::cout << "server read_callback\n";
+  // 将数据写回
+  message->len = input_buf.length();
+  bzero(message->buf, message->len);
+  memcpy(message->buf, input_buf.data(), message->len);
+
+  input_buf.pop(message->len);
+  input_buf.adjust();
+
+  std::cout << "recv data:" << message->buf << std::endl;
+  // echo
+  el->del_io_event(fd, EPOLLIN);
+  el->add_io_event(fd, EPOLLOUT, server_write_callback, message);
 }
 
 TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
@@ -82,51 +140,20 @@ void TcpServer::do_accept() {
         continue;
       } else if (errno == EAGAIN) {
         // 如果是非阻塞模式，且没有连接，返回EAGAIN
+        std::cerr << "tcp::server accept() error EAGAIN\n";
         break;
       } else if (errno == EMFILE) {
         // 链接过多了
         std::cerr << "tcp::server accept() error EMFILE\n";
+        continue;
       } else {
         std::cerr << "tcp::server accept() error\n";
         exit(1);
       }
-    } else {
-      int read_len = 0;
-      InputBuffer input_buffer;
-      OutputBuffer output_buffer;
-      char *message;
-      int message_len;
-      // echo
-      do {
-        // 客户端数据读到InputBuffer
-        read_len = input_buffer.read_data(connection_fd);
-        if (read_len == -1) {
-          std::cerr << "TcpServer read_data() error\n";
-          break;
-        }
-        std::cout << "read_len = " << read_len << "\n";
-        message_len = input_buffer.length();
-        message = (char *)malloc(message_len);
-        bzero(message, message_len);
-        memcpy(message, input_buffer.data(), message_len);
-        //  buffer已读取的数据剔除
-        input_buffer.pop(message_len);
-        input_buffer.adjust();
-        std::cout << "server recv data = " << message << "\n ";
-        // 数据写到OutputBuffer
-        output_buffer.add_data(message, message_len);
-        while (output_buffer.length()) {
-          int written = output_buffer.write_to(connection_fd);
-          if (written == -1) {
-            std::cerr << " TcpServer write_to() error\n";
-          } else if (written == 0) {
-            // fd不可写,等待下次写
-            continue;
-          }
-        }
-        free(message);
-      } while (read_len != 0);
-      close(connection_fd);
     }
+    // accept success
+    Message message;
+    // TODO
+    _loop->add_io_event(connection_fd, EPOLLIN, server_read_callback, &message);
   }
 }

@@ -18,7 +18,7 @@ enum class MEM_CAP : std::uint32_t {
   m8M = 8388608    // 8M 23bit
 };
 
-inline int mem_cap_to_int(MEM_CAP cap) { return static_cast<int>(cap); }
+inline const int mem_cap_to_int(MEM_CAP cap) { return static_cast<int>(cap); }
 
 const constexpr std::uint64_t MEM_LIMIT = 5368709120;  // 5G，单位为B
 
