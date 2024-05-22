@@ -151,9 +151,10 @@ void TcpServer::do_accept() {
         exit(1);
       }
     }
+    std::cout << "accept success\n";
     // accept success
     Message message;
-    // TODO
     _loop->add_io_event(connection_fd, EPOLLIN, server_read_callback, &message);
+    return;
   }
 }
