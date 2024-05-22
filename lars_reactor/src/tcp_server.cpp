@@ -12,7 +12,14 @@
 
 #include "reactor_buf.h"
 
-TcpServer::TcpServer(const char *ip, std::uint16_t port) {
+// using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
+void accept_callback(EventLoop *el, int fd, void *args) {
+  TcpServer *server = (TcpServer *)args;
+  server->do_accept();
+}
+
+TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
+    : _loop(loop) {
   bzero(&_connection_addr, sizeof(_connection_addr));
   // 忽略一些信号 SIGHUP, SIGPIPE
   // SIGPIPE:如果客户端关闭，服务端再次write就会产生
@@ -57,6 +64,8 @@ TcpServer::TcpServer(const char *ip, std::uint16_t port) {
     std::cerr << "tcp::server listen() error\n";
     exit(1);
   }
+  // 注册socket读事件accept到eventLoop
+  _loop->add_io_event(_sockfd, EPOLLIN, accept_callback, this);
 }
 
 TcpServer::~TcpServer() { close(_sockfd); }

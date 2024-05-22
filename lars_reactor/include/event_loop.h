@@ -3,7 +3,6 @@
 #include <sys/epoll.h>
 
 #include <unordered_set>
-#include <vector>
 
 #include "event_base.h"
 

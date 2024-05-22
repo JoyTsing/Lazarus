@@ -5,9 +5,11 @@
 
 #include <cstdint>
 
+#include "event_loop.h"
+
 class TcpServer {
  public:
-  TcpServer(const char* ip, std::uint16_t port);
+  TcpServer(EventLoop* loop, const char* ip, std::uint16_t port);
   ~TcpServer();
   void do_accept();
 
@@ -15,4 +17,7 @@ class TcpServer {
   int _sockfd;
   struct sockaddr_in _connection_addr;
   socklen_t _connection_addr_len;
+
+  // eventLoop
+  EventLoop* _loop;
 };
