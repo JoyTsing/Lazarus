@@ -17,7 +17,11 @@ class EventLoop {
  public:
   EventLoop();
 
-  // 阻塞等待事件发生
+  /**
+   * @brief
+   * 阻塞循环监听事件发生,并处理epoll_wait返回的事件，同时调用对应的回调函数
+   *
+   */
   void event_process();
 
   /**
@@ -36,14 +40,14 @@ class EventLoop {
   // 删除事件触发条件(EPOLLIN,EPOLLOUT)
   void del_io_event(int fd, int mask);
 
- private:
   static constexpr const int MAX_EVENTS = 128;
 
+ private:
   int _epoll_fd;  // epoll_create
   // 事件表
   io_event_map _io_events;
   // 正在监听的fd集合
   listen_fd_set _listen_fds;
   // 每次epoll_wait返回的事件集合
-  std::vector<epoll_event> _fired_events;
+  epoll_event _fired_events[MAX_EVENTS];
 };
