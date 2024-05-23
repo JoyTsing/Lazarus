@@ -2,8 +2,7 @@ CXX=g++
 CFLAGS=-g -O2 -Wall -fPIC -Wno-deprecated 
 
 INC=-I../../include
-LIB=-L../../lib -lreactor 
-OBJS = $(addsuffix .o, $(basename $(wildcard *.cc)))
+LIB=-L../../lib -lreactor
 
 all:
 	$(CXX) -o lars_reactor_test $(CFLAGS)  lars_reactor.cpp $(INC) $(LIB)

@@ -11,7 +11,7 @@ class TcpServer {
  public:
   TcpServer(EventLoop* loop, const char* ip, std::uint16_t port);
   ~TcpServer();
-  void do_accept();
+  void handle_accept();
 
  private:
   int _sockfd;

@@ -11,70 +11,9 @@
 #include <cstring>
 #include <iostream>
 
-#include "reactor_buf.h"
+#include "tcp_connection.h"
 
 // using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
-void accept_callback(EventLoop *el, int fd, void *args) {
-  TcpServer *server = (TcpServer *)args;
-  server->do_accept();
-}
-
-// 测试用的首发消息结构体
-struct Message {
-  int len;
-  char buf[4096];
-};
-
-void server_read_callback(EventLoop *el, int fd, void *args);
-
-void server_write_callback(EventLoop *el, int fd, void *args) {
-  Message *message = (Message *)args;
-  // 写回数据
-  OutputBuffer output_buf;
-  output_buf.add_data(message->buf, message->len);
-  while (output_buf.length()) {
-    int write_len = output_buf.write_to(fd);
-    if (write_len == -1) {
-      std::cerr << "write error\n";
-      return;
-    } else if (write_len == 0) {
-      // 不可写
-      break;
-    }
-  }
-  // 写完了，注册读事件
-  el->del_io_event(fd, EPOLLOUT);
-  el->add_io_event(fd, EPOLLIN, server_read_callback, message);
-}
-
-// 客户端connect成功后，注册的读回调函数
-void server_read_callback(EventLoop *el, int fd, void *args) {
-  Message *message = (Message *)args;
-  // 读取数据
-  InputBuffer input_buf;
-  int read_len = input_buf.read_data(fd);
-  if (read_len == -1 || read_len == 0) {
-    std::cerr << "close\n";
-    // 删除事件
-    el->del_io_event(fd);
-    close(fd);
-    return;
-  }
-  // 读取成功
-  std::cout << "server read_callback\n";
-  // 将数据写回
-  message->len = input_buf.length();
-  bzero(message->buf, message->len);
-  memcpy(message->buf, input_buf.data(), message->len);
-
-  input_buf.pop(message->len);
-  input_buf.adjust();
-
-  std::cout << "recv data:" << message->buf << std::endl;
-  // echo
-  el->del_io_event(fd, EPOLLIN);
-  el->add_io_event(fd, EPOLLOUT, server_write_callback, message);
-}
 
 TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
     : _loop(loop) {
@@ -123,12 +62,18 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
     exit(1);
   }
   // 注册socket读事件accept到eventLoop
-  _loop->add_io_event(_sockfd, EPOLLIN, accept_callback, this);
+  _loop->add_io_event(
+      _sockfd, EPOLLIN,
+      [](IO_EVENT_ARGUMENT) {
+        TcpServer *server = (TcpServer *)args;
+        server->handle_accept();
+      },
+      this);
 }
 
 TcpServer::~TcpServer() { close(_sockfd); }
 
-void TcpServer::do_accept() {
+void TcpServer::handle_accept() {
   int connection_fd;
   while (true) {
     // 1 accept
@@ -151,10 +96,9 @@ void TcpServer::do_accept() {
         exit(1);
       }
     }
-    std::cout << "accept success\n";
     // accept success
-    Message message;
-    _loop->add_io_event(connection_fd, EPOLLIN, server_read_callback, &message);
-    return;
+    TCPConnection *conn = new TCPConnection(connection_fd, _loop);
+
+    break;
   }
 }

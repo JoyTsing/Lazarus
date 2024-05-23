@@ -8,6 +8,8 @@
 
 struct IOEvent;
 
+#define IO_EVENT_ARGUMENT EventLoop *el, int fd, void *args
+
 using io_event_map = std::unordered_map<int, IOEvent>;
 using io_event_map_iter = io_event_map::iterator;
 using listen_fd_set = std::unordered_set<int>;
@@ -31,7 +33,7 @@ class EventLoop {
    * @param proc 触发事件时的回调函数
    * @param args 回调函数参数
    */
-  void add_io_event(int fd, int mask, io_call_back proc, void* args);
+  void add_io_event(int fd, int mask, io_call_back proc, void *args);
 
   // 删除事件
   void del_io_event(int fd);
