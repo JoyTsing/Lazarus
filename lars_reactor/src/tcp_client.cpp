@@ -61,6 +61,7 @@ void TcpClient::handle_connect() {
     if (errno == EINPROGRESS) {
       // connect in progress
       // check writable
+      fprintf(stderr, "do_connect EINPROGRESS\n");
       _loop->add_io_event(
           _sockfd, EPOLLOUT,
           [](IO_EVENT_ARGUMENT) {
@@ -74,6 +75,8 @@ void TcpClient::handle_connect() {
       exit(1);
     }
   }
+  printf("connect %s:%d succ!\n", inet_ntoa(_server_addr.sin_addr),
+         ntohs(_server_addr.sin_port));
   _loop->add_io_event(
       _sockfd, EPOLLIN,
       [](IO_EVENT_ARGUMENT) {

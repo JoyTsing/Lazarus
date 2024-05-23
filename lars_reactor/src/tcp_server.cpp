@@ -45,14 +45,13 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
 
   // set socket CAN REUSE
   int op = 1;
-  if (setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op))) {
+  if (setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
     std::cerr << "tcp::server setsockopt() error\n";
     exit(1);
   }
 
   // bind the port
-  if (bind(_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) ==
-      -1) {
+  if (bind(_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
     std::cerr << "tcp::server bind() error\n";
     exit(1);
   }
@@ -77,6 +76,7 @@ void TcpServer::handle_accept() {
   int connection_fd;
   while (true) {
     // 1 accept
+    std::cout << "begin accept\n";
     connection_fd = accept(_sockfd, (struct sockaddr *)&_connection_addr,
                            &_connection_addr_len);
     if (connection_fd == -1) {
@@ -98,6 +98,7 @@ void TcpServer::handle_accept() {
     }
     // accept success
     TCPConnection *conn = new TCPConnection(connection_fd, _loop);
+    std::cout << "get new connection succ!\n";
     break;
   }
 }

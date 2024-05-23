@@ -21,11 +21,11 @@ class TcpClient {
 
   void clear();
 
-  void handle_connect();
-
   // set event callback
   void set_message_callback(message_call_back cb) { _message_cb = cb; }
 
+ private:
+  void handle_connect();
   void handle_read();
   void handle_write();
   void handle_connection_success(int fd);
