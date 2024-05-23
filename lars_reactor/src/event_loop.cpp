@@ -67,7 +67,11 @@ void EventLoop::add_io_event(int fd, int mask, io_call_back proc, void* args) {
     _io_events[fd].write_callback = proc;
     _io_events[fd].write_args = args;
   }
+
+  // 更新mask
+  _io_events[fd].mask = final_mask;
   // 3添加到原生的epoll
+
   epoll_event ev;
   ev.data.fd = fd;
   ev.events = final_mask;
