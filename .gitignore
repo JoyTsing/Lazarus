@@ -39,5 +39,6 @@
 .vscode
 .cache
 compile_commands.json
-lars_reactor_test
+server
+client
 # End of https://www.toptal.com/developers/gitignore/api/c++

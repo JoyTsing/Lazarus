@@ -20,7 +20,7 @@ void handle_test(const char* data, uint32_t len, int msgid, void* args,
 TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
     : _conn_fd(conn_fd), _event_loop(event_loop) {
   // connection fd set non-blocking
-  int flags = fcntl(_conn_fd, F_GETFL);
+  int flags = fcntl(_conn_fd, F_GETFL, 0);
   fcntl(_conn_fd, F_SETFL, flags | O_NONBLOCK);
   // TCP_NODELAY
   int op = 1;
@@ -30,7 +30,7 @@ TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
       _conn_fd, EPOLLIN,
       [](IO_EVENT_ARGUMENT) {
         TCPConnection* conn = (TCPConnection*)args;
-        conn->handle_read(el, fd, args);
+        conn->handle_read();
       },
       this);
 
@@ -38,12 +38,12 @@ TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
       _conn_fd, EPOLLOUT,
       [](IO_EVENT_ARGUMENT) {
         TCPConnection* conn = (TCPConnection*)args;
-        conn->handle_write(el, fd, args);
+        conn->handle_write();
       },
       this);
 }
 
-void TCPConnection::handle_read(IO_EVENT_ARGUMENT) {
+void TCPConnection::handle_read() {
   // 1 read data from connection fd
   int ret = _input_buf.read_data(_conn_fd);
   if (ret == -1 || ret == 0) {
@@ -73,7 +73,7 @@ void TCPConnection::handle_read(IO_EVENT_ARGUMENT) {
   _input_buf.adjust();
 }
 
-void TCPConnection::handle_write(IO_EVENT_ARGUMENT) {
+void TCPConnection::handle_write() {
   // 此时output buffer中有数据
   while (_output_buf.length() > 0) {
     int ret = _output_buf.write_to(_conn_fd);
@@ -117,7 +117,7 @@ int TCPConnection::send_message(const char* data, int len, int message_id) {
         _conn_fd, EPOLLOUT,
         [](IO_EVENT_ARGUMENT) {
           TCPConnection* conn = (TCPConnection*)args;
-          conn->handle_write(el, fd, args);
+          conn->handle_write();
         },
         this);
   }

@@ -98,7 +98,6 @@ void TcpServer::handle_accept() {
     }
     // accept success
     TCPConnection *conn = new TCPConnection(connection_fd, _loop);
-
     break;
   }
 }

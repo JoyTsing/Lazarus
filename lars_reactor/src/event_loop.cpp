@@ -72,7 +72,7 @@ void EventLoop::add_io_event(int fd, int mask, io_call_back proc, void* args) {
   ev.data.fd = fd;
   ev.events = final_mask;
   if (epoll_ctl(_epoll_fd, op, fd, &ev) == -1) {
-    std::cerr << "EventLoop::add_io_event epoll_ctl failed";
+    std::cerr << "EventLoop::add_io_event epoll_ctl failed\n";
     return;
   }
   // 4添加到正在监听的fd中

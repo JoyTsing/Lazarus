@@ -8,17 +8,20 @@
 class TCPConnection {
  public:
   TCPConnection(int conn_fd, EventLoop* event_loop);
+  // clear
+  void clear();
+
+  int send_message(const char* data, int len, int message_id);
+
+ private:
   /**
    * @brief read event , and cut the message package
    *
    */
-  void handle_read(IO_EVENT_ARGUMENT);
+  void handle_read();
   // write event
-  void handle_write(IO_EVENT_ARGUMENT);
+  void handle_write();
   // patch message
-  int send_message(const char* data, int len, int message_id);
-  // clear
-  void clear();
 
  private:
   // fd
