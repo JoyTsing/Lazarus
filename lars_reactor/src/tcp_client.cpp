@@ -103,7 +103,7 @@ void TCPClient::handle_write() {  // 此时output buffer中有数据
     }
   }
   if (_output_buf.length() == 0) {
-    add_read_event(_sockfd);  // TODO should be remove
+    _loop->del_io_event(_sockfd, EPOLLOUT);
   }
 }
 
