@@ -92,8 +92,10 @@ void EventLoop::del_io_event(int fd, int mask) {
   if (it == _io_events.end()) {
     return;
   }
-  int final_mask = it->second.mask & (~mask);
+  int& final_mask = it->second.mask;
+  final_mask = final_mask & (~mask);
   if (final_mask == 0) {
+    std::cout << "del io event\n";
     del_io_event(fd);
   } else {
     epoll_event ev;

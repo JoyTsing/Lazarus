@@ -26,21 +26,7 @@ TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
   int op = 1;
   setsockopt(_conn_fd, IPPROTO_TCP, TCP_NODELAY, &op, sizeof(op));
   // use lambda function to bind read and write event
-  _event_loop->add_io_event(
-      _conn_fd, EPOLLIN,
-      [](IO_EVENT_ARGUMENT) {
-        TCPConnection* conn = (TCPConnection*)args;
-        conn->handle_read();
-      },
-      this);
-
-  _event_loop->add_io_event(
-      _conn_fd, EPOLLOUT,
-      [](IO_EVENT_ARGUMENT) {
-        TCPConnection* conn = (TCPConnection*)args;
-        conn->handle_write();
-      },
-      this);
+  add_read_event(_conn_fd);
 }
 
 void TCPConnection::handle_read() {
@@ -65,7 +51,7 @@ void TCPConnection::handle_read() {
     }
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    std::cout << _input_buf.data() << std::endl;
+    std::cout << "read data:" << _input_buf.data() << std::endl;
     handle_test(_input_buf.data(), head.message_len, head.message_id, nullptr,
                 this);
     _input_buf.pop(head.message_len);
@@ -87,6 +73,26 @@ void TCPConnection::handle_write() {
   if (_output_buf.length() == 0) {
     _event_loop->del_io_event(_conn_fd, EPOLLOUT);
   }
+}
+
+void TCPConnection::add_read_event(int fd) {
+  _event_loop->add_io_event(
+      fd, EPOLLIN,
+      [](IO_EVENT_ARGUMENT) {
+        TCPConnection* conn = (TCPConnection*)args;
+        conn->handle_read();
+      },
+      this);
+}
+
+void TCPConnection::add_write_event(int fd) {
+  _event_loop->add_io_event(
+      fd, EPOLLOUT,
+      [](IO_EVENT_ARGUMENT) {
+        TCPConnection* conn = (TCPConnection*)args;
+        conn->handle_write();
+      },
+      this);
 }
 
 int TCPConnection::send_message(const char* data, int len, int message_id) {
@@ -113,13 +119,7 @@ int TCPConnection::send_message(const char* data, int len, int message_id) {
   }
   // register write event
   if (epollout) {
-    _event_loop->add_io_event(
-        _conn_fd, EPOLLOUT,
-        [](IO_EVENT_ARGUMENT) {
-          TCPConnection* conn = (TCPConnection*)args;
-          conn->handle_write();
-        },
-        this);
+    add_write_event(_conn_fd);
   }
   return 0;
 }

@@ -21,7 +21,10 @@ class TCPConnection {
   void handle_read();
   // write event
   void handle_write();
-  // patch message
+
+ private:
+  void add_read_event(int fd);
+  void add_write_event(int fd);
 
  private:
   // fd

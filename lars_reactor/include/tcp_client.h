@@ -6,15 +6,15 @@
 #include "event_loop.h"
 #include "reactor_buf.h"
 
-class TcpClient;
+class TCPClient;
 
 using message_call_back =
     std::function<void(const char* data, uint32_t len, int message_id,
-                       TcpClient* client, void* user_data)>;
+                       TCPClient* client, void* user_data)>;
 
-class TcpClient {
+class TCPClient {
  public:
-  TcpClient(EventLoop* loop, const char* ip, unsigned short port);
+  TCPClient(EventLoop* loop, const char* ip, unsigned short port);
 
   // send
   int send_message(const char* data, int len, int message_id);
@@ -22,13 +22,17 @@ class TcpClient {
   void clear();
 
   // set event callback
-  void set_message_callback(message_call_back cb) { _message_cb = cb; }
+  void set_callback(message_call_back cb) { _message_cb = cb; }
 
  private:
   void handle_connect();
   void handle_read();
   void handle_write();
-  void handle_connection_success(int fd);
+  void handle_connection_delay(int fd);
+
+ private:
+  void add_read_event(int fd);
+  void add_write_event(int fd);
 
  private:
   int _sockfd;
