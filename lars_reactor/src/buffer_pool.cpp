@@ -15,7 +15,7 @@ void BufferPool::init_buffer_unit(int size, MEM_CAP page_size) {
   for (int i = 1; i < size; i++) {
     prev->next = new IOBuffer(mem_size);
     assert(prev->next);
-    prev->next = prev;
+    prev = prev->next;  // 我草了这都能错
   }
   _total_mem += size * mem_size;
 }

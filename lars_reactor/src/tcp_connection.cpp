@@ -86,7 +86,8 @@ void TCPConnection::handle_write() {
     if (ret == -1) {
       clear();
       return;
-    } else if (ret == 0) {
+    }
+    if (ret == 0) {
       break;
     }
   }
@@ -132,4 +133,5 @@ void TCPConnection::clear() {
   _input_buf.clear();
   _output_buf.clear();
   close(_conn_fd);
+  _conn_fd = -1;
 }

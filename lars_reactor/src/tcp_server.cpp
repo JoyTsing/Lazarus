@@ -95,10 +95,11 @@ void TcpServer::handle_accept() {
         std::cerr << "tcp::server accept() error\n";
         exit(1);
       }
+    } else {
+      // accept success
+      TCPConnection *conn = new TCPConnection(connection_fd, _loop);
+      std::cout << "get new connection succ!\n";
+      break;
     }
-    // accept success
-    TCPConnection *conn = new TCPConnection(connection_fd, _loop);
-    std::cout << "get new connection succ!\n";
-    break;
   }
 }

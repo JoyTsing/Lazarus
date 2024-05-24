@@ -75,9 +75,6 @@ void TCPClient::handle_read() {
   while (_input_buf.length() >= MESSAGE_HEAD_LEN) {
     // 2.1 parse message header
     memcpy(&head, _input_buf.data(), MESSAGE_HEAD_LEN);
-    std::cout << "_input_buf data:" << _input_buf.data() << "\n";
-    std::cout << "head len: " << head.message_len << '\n';
-    std::cout << "head id: " << head.message_id << "\n";
     if (head.message_len > MESSAGE_LENGTH_LIMIT || head.message_len < 0) {
       clear();
       break;
@@ -87,7 +84,6 @@ void TCPClient::handle_read() {
       std::cerr << "";
       break;
     }
-    std::cout << "read data= " << _input_buf.data() << "\n";
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
     _input_buf.adjust();
@@ -96,8 +92,8 @@ void TCPClient::handle_read() {
                   nullptr);  // 逆天，最后两个参数反了
     }
     _input_buf.pop(head.message_len);
-    _input_buf.adjust();
   }
+  _input_buf.adjust();
 }
 
 void TCPClient::handle_write() {  // 此时output buffer中有数据

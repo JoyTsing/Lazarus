@@ -2,6 +2,7 @@
 
 #include <sys/epoll.h>
 
+#include <cassert>
 #include <cstddef>
 #include <iostream>
 
@@ -16,25 +17,30 @@ EventLoop::EventLoop() {
 }
 
 void EventLoop::event_process() {
-  io_event_map_iter it;
   while (true) {
+    io_event_map_iter it;
     int nfds = epoll_wait(_epoll_fd, _fired_events, MAX_EVENTS, -1);
     for (int i = 0; i < nfds; i++) {
       int fd = _fired_events[i].data.fd;
       it = _io_events.find(fd);
+      assert(it != _io_events.end());
       IOEvent* event = &(it->second);
       if (_fired_events[i].events & EPOLLIN) {
         // read
-        event->read_callback(this, fd, event->read_args);
+        void* args = event->read_args;
+        event->read_callback(this, fd, args);
       } else if (_fired_events[i].events & EPOLLOUT) {
         // write
-        event->write_callback(this, fd, event->write_args);
+        void* args = event->write_args;
+        event->write_callback(this, fd, args);
       } else if (_fired_events[i].events & (EPOLLERR | EPOLLHUP)) {
         // 水平触发未处理出现HUP，需要正常处理读写，如果events没有读也没有写，将events从epoll中去掉
         if (event->read_callback != nullptr) {
-          event->read_callback(this, fd, event->read_args);
+          void* args = event->read_args;
+          event->read_callback(this, fd, args);
         } else if (event->write_callback != nullptr) {
-          event->write_callback(this, fd, event->write_args);
+          void* args = event->write_args;
+          event->write_callback(this, fd, args);
         } else {
           // 从epoll中去掉
           std::cerr
