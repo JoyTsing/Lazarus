@@ -17,6 +17,26 @@ void handle_test(const char* data, uint32_t len, int msgid, void* args,
   conn->send_message(data, len, msgid);
 }
 
+void TCPConnection::add_read_event(int fd) {
+  _event_loop->add_io_event(
+      fd, EPOLLIN,
+      [](IO_EVENT_ARGUMENT) {
+        TCPConnection* conn = (TCPConnection*)args;
+        conn->handle_read();
+      },
+      this);
+}
+
+void TCPConnection::add_write_event(int fd) {
+  _event_loop->add_io_event(
+      fd, EPOLLOUT,
+      [](IO_EVENT_ARGUMENT) {
+        TCPConnection* conn = (TCPConnection*)args;
+        conn->handle_write();
+      },
+      this);
+}
+
 TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
     : _conn_fd(conn_fd), _event_loop(event_loop) {
   // connection fd set non-blocking
@@ -51,7 +71,6 @@ void TCPConnection::handle_read() {
     }
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    std::cerr << "read data:" << _input_buf.data() << "\n";
     handle_test(_input_buf.data(), head.message_len, head.message_id, nullptr,
                 this);
     _input_buf.pop(head.message_len);
@@ -61,7 +80,7 @@ void TCPConnection::handle_read() {
 
 void TCPConnection::handle_write() {
   // 此时output buffer中有数据
-  while (_output_buf.length() > 0) {
+  while (_output_buf.length()) {
     int ret = _output_buf.write_to(_conn_fd);
     if (ret == -1) {
       clear();
@@ -73,26 +92,6 @@ void TCPConnection::handle_write() {
   if (_output_buf.length() == 0) {
     _event_loop->del_io_event(_conn_fd, EPOLLOUT);
   }
-}
-
-void TCPConnection::add_read_event(int fd) {
-  _event_loop->add_io_event(
-      fd, EPOLLIN,
-      [](IO_EVENT_ARGUMENT) {
-        TCPConnection* conn = (TCPConnection*)args;
-        conn->handle_read();
-      },
-      this);
-}
-
-void TCPConnection::add_write_event(int fd) {
-  _event_loop->add_io_event(
-      fd, EPOLLOUT,
-      [](IO_EVENT_ARGUMENT) {
-        TCPConnection* conn = (TCPConnection*)args;
-        conn->handle_write();
-      },
-      this);
 }
 
 int TCPConnection::send_message(const char* data, int len, int message_id) {

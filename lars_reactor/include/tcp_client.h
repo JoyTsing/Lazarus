@@ -28,7 +28,7 @@ class TCPClient {
   void handle_connect();
   void handle_read();
   void handle_write();
-  void handle_connection_delay(int fd);
+  void handle_connection_delay();
 
  private:
   void add_read_event(int fd);

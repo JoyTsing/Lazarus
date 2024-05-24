@@ -26,7 +26,8 @@ TCPClient::TCPClient(EventLoop* loop, const char* ip, unsigned short port)
 }
 
 int TCPClient::send_message(const char* data, int len, int message_id) {
-  std::cout << "TcpClient::send_message\n";
+  std::cerr << "send message: " << data << ", len: " << len
+            << ", id: " << message_id << "\n";
   bool active_epollout = false;
   if (_output_buf.length() == 0) {
     active_epollout = true;
@@ -74,20 +75,24 @@ void TCPClient::handle_read() {
   while (_input_buf.length() >= MESSAGE_HEAD_LEN) {
     // 2.1 parse message header
     memcpy(&head, _input_buf.data(), MESSAGE_HEAD_LEN);
+    std::cout << "_input_buf data:" << _input_buf.data() << "\n";
+    std::cout << "head len: " << head.message_len << '\n';
+    std::cout << "head id: " << head.message_id << "\n";
     if (head.message_len > MESSAGE_LENGTH_LIMIT || head.message_len < 0) {
       clear();
       break;
     }
     // 2.2 check valid
     if (_input_buf.length() < MESSAGE_HEAD_LEN + head.message_len) {
+      std::cerr << "";
       break;
     }
     std::cout << "read data= " << _input_buf.data() << "\n";
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
     if (_message_cb != nullptr) {
-      _message_cb(_input_buf.data(), head.message_len, head.message_id, nullptr,
-                  this);
+      _message_cb(_input_buf.data(), head.message_len, head.message_id, this,
+                  nullptr);  // 逆天，最后两个参数反了
     }
     _input_buf.pop(head.message_len);
   }
@@ -110,13 +115,12 @@ void TCPClient::handle_write() {  // 此时output buffer中有数据
   }
 }
 
-void TCPClient::handle_connection_delay(int fd) {
-  std::cout << "TcpClient::handle_connection_success\n";
-  _loop->del_io_event(fd);
+void TCPClient::handle_connection_delay() {
+  _loop->del_io_event(_sockfd);
   // check
   int res = 0;
   socklen_t len = sizeof(res);
-  getsockopt(fd, SOL_SOCKET, SO_ERROR, &res, &len);
+  getsockopt(_sockfd, SOL_SOCKET, SO_ERROR, &res, &len);
   if (res != 0) {
     // handle error
     std::cerr << "client connect error\n";
@@ -124,13 +128,13 @@ void TCPClient::handle_connection_delay(int fd) {
   }
   std::cout << "connect success\n";
   // handle
-  const char* message = "hello from client\n";
+  const char* message = "hello from client";
   int msgid = 1;
   send_message(message, strlen(message), msgid);
   // add read event
-  add_read_event(fd);
+  add_read_event(_sockfd);
   if (_output_buf.length() != 0) {
-    add_write_event(fd);
+    add_write_event(_sockfd);
   }
 }
 
@@ -167,7 +171,7 @@ void TCPClient::handle_connect() {
   }
   int ret = connect(_sockfd, (const struct sockaddr*)&_server_addr, _addr_len);
   if (ret == 0) {
-    handle_connection_delay(_sockfd);
+    handle_connection_delay();
   } else {
     if (errno == EINPROGRESS) {
       // fd is non-blocking, connect is in progress
@@ -176,7 +180,7 @@ void TCPClient::handle_connect() {
           _sockfd, EPOLLOUT,
           [](IO_EVENT_ARGUMENT) {
             TCPClient* client = (TCPClient*)args;
-            client->handle_connection_delay(fd);
+            client->handle_connection_delay();
           },
           this);
       return;

@@ -18,9 +18,9 @@ void ReactorBuffer::pop(int len) {
   if (_buffer == nullptr || len > _buffer->length) {
     return;
   }
-  _buffer->pop(length());
+  _buffer->pop(len);  // 我操了这里调成length了
   if (_buffer->length == 0) {
-    clear();
+    BufferPool::instance()->revert(_buffer);
     _buffer = nullptr;  // 空数据的时候也能清空
   }
 }
@@ -52,8 +52,8 @@ int InputBuffer::read_data(int fd) {
       return -1;
     }
   } else {
-    // 当前的buffer不够存了
     assert(_buffer->head == 0);
+    // 当前的buffer不够存了
     if (_buffer->capacity - _buffer->length < (int)need_read) {
       IOBuffer* new_buffer =
           BufferPool::instance()->alloc_buffer(need_read + _buffer->length);
