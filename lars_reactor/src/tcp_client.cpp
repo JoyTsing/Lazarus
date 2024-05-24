@@ -86,7 +86,6 @@ void TCPClient::handle_read() {
     }
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    _input_buf.adjust();
     if (_message_cb != nullptr) {
       _message_cb(_input_buf.data(), head.message_len, head.message_id, this,
                   nullptr);  // 逆天，最后两个参数反了

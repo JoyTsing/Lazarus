@@ -71,12 +71,11 @@ void TCPConnection::handle_read() {
     }
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    _input_buf.adjust();
     handle_test(_input_buf.data(), head.message_len, head.message_id, nullptr,
                 this);
     _input_buf.pop(head.message_len);
-    _input_buf.adjust();
   }
+  _input_buf.adjust();
 }
 
 void TCPConnection::handle_write() {

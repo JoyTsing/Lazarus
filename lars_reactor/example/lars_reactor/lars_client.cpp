@@ -9,9 +9,9 @@ void handle(const char *data, uint32_t len, int msgid, TCPClient *conn,
   printf("recv server: [%s]\n", data);
   printf("msgid: [%d]\n", msgid);
   printf("len: [%d]\n", len);
-  printf("====================================");
+  printf("====================================\n");
   // 发送数据给服务端
-  // conn->send_message(data, len, msgid + 1);
+  conn->send_message(data, len, msgid + 1);
 }
 
 int main() {
