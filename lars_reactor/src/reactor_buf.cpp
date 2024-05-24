@@ -15,9 +15,7 @@ ReactorBuffer::ReactorBuffer() : _buffer(nullptr) {}
 ReactorBuffer::~ReactorBuffer() { clear(); }
 
 void ReactorBuffer::pop(int len) {
-  if (_buffer == nullptr || len > _buffer->length) {
-    return;
-  }
+  assert(_buffer != nullptr && len <= _buffer->length);
   _buffer->pop(len);  // 我操了这里调成length了
   if (_buffer->length == 0) {
     BufferPool::instance()->revert(_buffer);
