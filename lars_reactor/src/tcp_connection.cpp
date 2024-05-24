@@ -51,7 +51,7 @@ void TCPConnection::handle_read() {
     }
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    std::cout << "read data:" << _input_buf.data() << std::endl;
+    std::cerr << "read data:" << _input_buf.data() << "\n";
     handle_test(_input_buf.data(), head.message_len, head.message_id, nullptr,
                 this);
     _input_buf.pop(head.message_len);
@@ -96,7 +96,7 @@ void TCPConnection::add_write_event(int fd) {
 }
 
 int TCPConnection::send_message(const char* data, int len, int message_id) {
-  std::cout << "send message: " << data << ", len: " << len
+  std::cerr << "send message: " << data << ", len: " << len
             << ", id: " << message_id << "\n";
   bool epollout = false;
   if (_output_buf.length() == 0) {
@@ -108,13 +108,15 @@ int TCPConnection::send_message(const char* data, int len, int message_id) {
   head.message_id = message_id;
   head.message_len = len;
   int ret = _output_buf.add_data((const char*)&head, MESSAGE_HEAD_LEN);
-  if (ret == -1) {
+  if (ret != 0) {
+    std::cerr << "send head error\n";
     return -1;
   }
   // data
   ret = _output_buf.add_data(data, len);
-  if (ret == -1) {
+  if (ret != 0) {
     _output_buf.pop(MESSAGE_HEAD_LEN);
+    std::cerr << "send head error\n";
     return -1;
   }
   // register write event

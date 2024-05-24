@@ -139,5 +139,5 @@ int OutputBuffer::add_data(const char* data, int len) {
   // 将新数据拼接到之前的数据之后
   memcpy(_buffer->data + _buffer->length, data, len);
   _buffer->length += len;
-  return len;
+  return 0;
 }

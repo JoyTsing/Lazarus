@@ -11,6 +11,7 @@
 
 #include "event_loop.h"
 #include "message.h"
+
 TCPClient::TCPClient(EventLoop* loop, const char* ip, unsigned short port)
     : _loop(loop) {
   _sockfd = -1;
@@ -36,11 +37,12 @@ int TCPClient::send_message(const char* data, int len, int message_id) {
   head.message_len = len;
   // add head to output buffer
   int ret = _output_buf.add_data((const char*)&head, MESSAGE_HEAD_LEN);
-  if (ret == -1) {
+  if (ret != 0) {
+    std::cerr << "send head error\n";
     return -1;
   }
   ret = _output_buf.add_data(data, len);
-  if (ret == -1) {
+  if (ret != 0) {
     _output_buf.pop(MESSAGE_HEAD_LEN);
     return -1;
   }
@@ -80,9 +82,10 @@ void TCPClient::handle_read() {
     if (_input_buf.length() < MESSAGE_HEAD_LEN + head.message_len) {
       break;
     }
+    std::cout << "read data= " << _input_buf.data() << "\n";
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    if (_message_cb) {
+    if (_message_cb != nullptr) {
       _message_cb(_input_buf.data(), head.message_len, head.message_id, nullptr,
                   this);
     }
@@ -163,7 +166,9 @@ void TCPClient::handle_connect() {
     exit(1);
   }
   int ret = connect(_sockfd, (const struct sockaddr*)&_server_addr, _addr_len);
-  if (ret == -1) {
+  if (ret == 0) {
+    handle_connection_delay(_sockfd);
+  } else {
     if (errno == EINPROGRESS) {
       // fd is non-blocking, connect is in progress
       fprintf(stderr, "do_connect EINPROGRESS\n");
@@ -181,5 +186,4 @@ void TCPClient::handle_connect() {
       exit(1);
     }
   }
-  handle_connection_delay(_sockfd);
 }
