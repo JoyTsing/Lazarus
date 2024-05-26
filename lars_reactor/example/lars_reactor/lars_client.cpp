@@ -11,7 +11,7 @@ void handle(const char *data, uint32_t len, int msgid, TCPClient *conn,
   printf("len: [%d]\n", len);
   printf("====================================\n");
   // 发送数据给服务端
-  conn->send_message(data, len, msgid + 1);
+  // conn->send_message(data, len, msgid + 1);
 }
 
 int main() {

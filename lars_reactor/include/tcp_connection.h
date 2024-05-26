@@ -8,6 +8,7 @@
 class TCPConnection {
  public:
   TCPConnection(int conn_fd, EventLoop* event_loop);
+  ~TCPConnection();
   // clear
   void clear();
 

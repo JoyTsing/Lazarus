@@ -10,10 +10,14 @@
 #include <csignal>
 #include <cstring>
 #include <iostream>
+#include <mutex>
 
 #include "tcp_connection.h"
 
 // using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
+int TcpServer::_max_conns = 0;
+std::mutex TcpServer::_mutex;
+std::unordered_map<int, TCPConnection *> TcpServer::_conns;
 
 TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
     : _loop(loop) {
@@ -60,6 +64,10 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
     std::cerr << "tcp::server listen() error\n";
     exit(1);
   }
+
+  // init connection number
+  _max_conns = MAX_CONNS;
+
   // 注册socket读事件accept到eventLoop
   _loop->add_io_event(
       _sockfd, EPOLLIN,
@@ -95,11 +103,31 @@ void TcpServer::handle_accept() {
         std::cerr << "tcp::server accept() error\n";
         exit(1);
       }
-    } else {
-      // accept success
-      TCPConnection *conn = new TCPConnection(connection_fd, _loop);
-      std::cout << "get new connection succ!\n";
-      break;
     }
+    // accept success
+    if (get_connection_num() >= _max_conns) {
+      std::cerr << "tcp::server connection num is max\n";
+      close(connection_fd);
+      continue;
+    }
+    new TCPConnection(connection_fd, _loop);
+    std::cout << "get new connection succ!\n";
+    break;
   }
 }
+
+void TcpServer::add_connection(int conn_fd, TCPConnection *conn) {
+  std::lock_guard<std::mutex> lock(_mutex);
+  std::cout << "add connection: " << conn_fd << "\n";
+  _conns[conn_fd] = conn;
+}
+
+void TcpServer::remove_connection(int conn_fd) {
+  std::lock_guard<std::mutex> lock(_mutex);
+  if (_conns.find(conn_fd) != _conns.end()) {
+    std::cout << "remove connection: " << conn_fd << "\n";
+    _conns.erase(conn_fd);
+  }
+}
+
+int TcpServer::get_connection_num() { return _conns.size(); }

@@ -6,6 +6,7 @@
 #include <sys/epoll.h>
 #include <sys/socket.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 
@@ -55,6 +56,7 @@ int TCPClient::send_message(const char* data, int len, int message_id) {
 
 void TCPClient::clear() {
   if (_sockfd != -1) {
+    printf("clean conn, del socket!\n");
     _loop->del_io_event(_sockfd);
     close(_sockfd);
   }
@@ -63,13 +65,18 @@ void TCPClient::clear() {
 }
 
 void TCPClient::handle_read() {
-  std::cout << "TcpClient::handle_read\n";
   // 1 read data from connection fd
   int ret = _input_buf.read_data(_sockfd);
-  if (ret == -1 || ret == 0) {
+  if (ret == -1) {
+    std::cerr << "TcpClient::handle_read read data from socket error\n";
     clear();
-    return;
+    exit(1);
+  } else if (ret == 0) {
+    std::cerr << "connection closed by peer\n";
+    clear();
+    exit(1);
   }
+  std::cout << "TcpClient::handle_read\n";
   // 2 check if data is ready to read aka. at least 8 bytes(message header)
   message_head head;
   while (_input_buf.length() >= MESSAGE_HEAD_LEN) {
@@ -81,7 +88,7 @@ void TCPClient::handle_read() {
     }
     // 2.2 check valid
     if (_input_buf.length() < MESSAGE_HEAD_LEN + head.message_len) {
-      std::cerr << "";
+      clear();
       break;
     }
     // 3 handle message
@@ -120,7 +127,7 @@ void TCPClient::handle_connection_delay() {
   if (res != 0) {
     // handle error
     std::cerr << "client connect error\n";
-    return;
+    exit(1);
   }
   std::cout << "connect success\n";
   // handle

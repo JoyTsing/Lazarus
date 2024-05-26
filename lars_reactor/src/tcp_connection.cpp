@@ -11,11 +11,14 @@
 #include "event_loop.h"
 #include "message.h"
 #include "reactor_buf.h"
+#include "tcp_server.h"
 
 void handle_test(const char* data, uint32_t len, int msgid, void* args,
                  TCPConnection* conn) {
   conn->send_message(data, len, msgid);
 }
+
+TCPConnection::~TCPConnection() { clear(); }
 
 void TCPConnection::add_read_event(int fd) {
   _event_loop->add_io_event(
@@ -47,6 +50,8 @@ TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
   setsockopt(_conn_fd, IPPROTO_TCP, TCP_NODELAY, &op, sizeof(op));
   // use lambda function to bind read and write event
   add_read_event(_conn_fd);
+  // add self to tcp_server connections
+  TcpServer::add_connection(_conn_fd, this);
 }
 
 void TCPConnection::handle_read() {
@@ -127,6 +132,8 @@ int TCPConnection::send_message(const char* data, int len, int message_id) {
 }
 
 void TCPConnection::clear() {
+  // remove from tcp_server connections
+  TcpServer::remove_connection(_conn_fd);
   _event_loop->del_io_event(_conn_fd);
 
   _input_buf.clear();
