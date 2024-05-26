@@ -108,10 +108,10 @@ void TcpServer::handle_accept() {
     if (get_connection_num() >= _max_conns) {
       std::cerr << "tcp::server connection num is max\n";
       close(connection_fd);
-      continue;
+    } else {
+      new TCPConnection(connection_fd, _loop);
+      std::cout << "get new connection succ!\n";
     }
-    new TCPConnection(connection_fd, _loop);
-    std::cout << "get new connection succ!\n";
     break;
   }
 }

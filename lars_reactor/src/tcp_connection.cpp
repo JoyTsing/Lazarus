@@ -57,7 +57,12 @@ TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
 void TCPConnection::handle_read() {
   // 1 read data from connection fd
   int ret = _input_buf.read_data(_conn_fd);
-  if (ret == -1 || ret == 0) {
+  if (ret == -1) {
+    std::cerr << "read data error\n";
+    clear();
+    return;
+  } else if (ret == 0) {
+    std::cerr << "connection closed by peer\n";
     clear();
     return;
   }
@@ -133,6 +138,7 @@ int TCPConnection::send_message(const char* data, int len, int message_id) {
 
 void TCPConnection::clear() {
   // remove from tcp_server connections
+  std::cout << "connection::clear\n";
   TcpServer::remove_connection(_conn_fd);
   _event_loop->del_io_event(_conn_fd);
 

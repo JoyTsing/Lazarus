@@ -56,7 +56,6 @@ int TCPClient::send_message(const char* data, int len, int message_id) {
 
 void TCPClient::clear() {
   if (_sockfd != -1) {
-    printf("clean conn, del socket!\n");
     _loop->del_io_event(_sockfd);
     close(_sockfd);
   }
