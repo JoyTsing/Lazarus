@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstring>
 
 #include "event_loop.h"
 #include "net_connection.h"
@@ -14,11 +15,25 @@ void handle(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
   printf("====================================\n");
 }
 
+// 新客户端创建后的回调函数
+void on_client_build(NetConnection *conn, void *args) {
+  int msgid = 1;
+  const char *msg = "hello darkness my old friend";
+  conn->send_message(msg, strlen(msg), msgid);
+}
+
+// 客户端断开后的回调函数
+void on_client_lost(NetConnection *conn, void *args) {
+  printf("=====>on client is lost\n");
+}
+
 int main() {
   EventLoop loop;
   TCPClient client(&loop, "127.0.0.1", 7777);
   client.add_message_router(1, handle);
   client.add_message_router(200, handle);
+  client.set_construct_hook(on_client_build);
+  client.set_destruct_hook(on_client_lost);
   loop.event_process();
   return 0;
 }

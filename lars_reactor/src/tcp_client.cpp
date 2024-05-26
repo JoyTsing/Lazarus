@@ -14,7 +14,12 @@
 #include "message.h"
 
 TCPClient::TCPClient(EventLoop* loop, const char* ip, unsigned short port)
-    : _loop(loop), _router() {
+    : _loop(loop),
+      _router(),
+      _construct_hook(nullptr),
+      _construct_hook_args(nullptr),
+      _destruct_hook(nullptr),
+      _destruct_hook_args(nullptr) {
   _sockfd = -1;
 
   bzero(&_server_addr, sizeof(_server_addr));
@@ -54,12 +59,18 @@ int TCPClient::send_message(const char* data, int len, int message_id) {
 }
 
 void TCPClient::clear() {
+  // handle hook-destruction
+  if (_destruct_hook != nullptr) {
+    _destruct_hook(this, _destruct_hook_args);
+  }
+
   if (_sockfd != -1) {
     _loop->del_io_event(_sockfd);
     close(_sockfd);
   }
   _sockfd = -1;
   // 长连接则重新连接
+  // handle_connect();
 }
 
 void TCPClient::handle_read() {
@@ -126,11 +137,12 @@ void TCPClient::handle_connection_delay() {
     std::cerr << "client connect error\n";
     exit(1);
   }
-  std::cout << "connect success\n";
-  // handle
-  const char* message = "hello from client";
-  int msgid = 1;
-  send_message(message, strlen(message), msgid);
+  // handle hook-connection
+  if (_construct_hook != nullptr) {
+    _construct_hook(this, _construct_hook_args);
+  }
+  // TODO handler TRX
+
   // add read event
   add_read_event(_sockfd);
   if (_output_buf.length() != 0) {
@@ -175,7 +187,6 @@ void TCPClient::handle_connect() {
   } else {
     if (errno == EINPROGRESS) {
       // fd is non-blocking, connect is in progress
-      fprintf(stderr, "do_connect EINPROGRESS\n");
       _loop->add_io_event(
           _sockfd, EPOLLOUT,
           [](IO_EVENT_ARGUMENT) {

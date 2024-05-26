@@ -5,7 +5,7 @@
 void handle(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
             void *user_data) {
   // 得到服务端回执的数据
-  printf("server callback\n");
+  printf("===>server callback\n");
   // 发送数据给服务端
   conn->send_message(data, len, msgid);
 }
@@ -29,7 +29,7 @@ void on_client_build(NetConnection *conn, void *args) {
 
 // 客户端断开后的回调函数
 void on_client_lost(NetConnection *conn, void *args) {
-  printf("client is lost\n");
+  printf("=====>client is lost\n");
 }
 
 int main(int argc, const char **argv) {

@@ -23,6 +23,17 @@ class TCPClient : public NetConnection {
     _router.register_router(msg_id, handler, args);
   }
 
+  // set con/des hook function
+  void set_construct_hook(connection_callback hook, void* args = nullptr) {
+    _construct_hook = hook;
+    _construct_hook_args = args;
+  }
+
+  void set_destruct_hook(connection_callback hook, void* args = nullptr) {
+    _destruct_hook = hook;
+    _destruct_hook_args = args;
+  }
+
  private:
   void handle_connect();
   void handle_read();
@@ -43,4 +54,10 @@ class TCPClient : public NetConnection {
   OutputBuffer _output_buf;
   // router
   message_router _router;
+  // hook function
+  connection_callback _construct_hook;
+  void* _construct_hook_args;
+
+  connection_callback _destruct_hook;
+  void* _destruct_hook_args;
 };

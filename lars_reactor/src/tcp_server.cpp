@@ -93,7 +93,6 @@ void TcpServer::handle_accept() {
   int connection_fd;
   while (true) {
     // 1 accept
-    std::cout << "begin accept\n";
     connection_fd = accept(_sockfd, (struct sockaddr *)&_connection_addr,
                            &_connection_addr_len);
     if (connection_fd == -1) {
@@ -119,7 +118,6 @@ void TcpServer::handle_accept() {
       close(connection_fd);
     } else {
       new TCPConnection(connection_fd, _loop);
-      std::cout << "get new connection succ!\n";
     }
     break;
   }
