@@ -18,6 +18,7 @@ int main() {
   EventLoop loop;
   TCPClient client(&loop, "127.0.0.1", 7777);
   client.add_message_router(1, handle);
+  client.add_message_router(200, handle);
   loop.event_process();
   return 0;
 }

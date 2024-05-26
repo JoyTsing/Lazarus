@@ -13,6 +13,7 @@
 #include <mutex>
 
 #include "message.h"
+#include "net_connection.h"
 #include "tcp_connection.h"
 
 // using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
@@ -20,6 +21,12 @@ int TcpServer::_max_conns = 0;
 std::mutex TcpServer::_mutex;
 std::unordered_map<int, TCPConnection *> TcpServer::_conns;
 message_router TcpServer::_router;
+
+connection_callback TcpServer::_construct_hook = nullptr;
+void *TcpServer::_construct_hook_args = nullptr;
+
+connection_callback TcpServer::_destruct_hook = nullptr;
+void *TcpServer::_destruct_hook_args = nullptr;
 
 TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
     : _loop(loop) {
@@ -121,6 +128,16 @@ void TcpServer::handle_accept() {
 void TcpServer::call_router(int msg_id, uint32_t len, const char *data,
                             NetConnection *conn) {
   _router.call_router(msg_id, len, data, conn);
+}
+
+void TcpServer::set_construct_hook(connection_callback hook, void *args) {
+  _construct_hook = hook;
+  _construct_hook_args = args;
+}
+
+void TcpServer::set_destruct_hook(connection_callback hook, void *args) {
+  _destruct_hook = hook;
+  _destruct_hook_args = args;
 }
 
 void TcpServer::add_message_router(int msg_id, message_callback handler,

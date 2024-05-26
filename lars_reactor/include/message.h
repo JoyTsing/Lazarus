@@ -11,9 +11,6 @@ using message_callback =
     std::function<void(const char* data, std::uint32_t len, int message_id,
                        NetConnection* client, void* user_data)>;
 
-// typedef void message_callback(const char* data, uint32_t len, int msgid,
-//                               NetConnection* client, void* user_data);
-
 const constexpr short MESSAGE_HEAD_LEN = 8;
 const constexpr int MESSAGE_LENGTH_LIMIT = 65527;
 

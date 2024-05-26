@@ -48,6 +48,11 @@ TCPConnection::TCPConnection(int conn_fd, EventLoop* event_loop)
   // TCP_NODELAY
   int op = 1;
   setsockopt(_conn_fd, IPPROTO_TCP, TCP_NODELAY, &op, sizeof(op));
+  // hook function
+  if (TcpServer::_construct_hook != nullptr) {
+    TcpServer::_construct_hook(this, TcpServer::_construct_hook_args);
+  }
+
   // use lambda function to bind read and write event
   add_read_event(_conn_fd);
   // add self to tcp_server connections
@@ -137,8 +142,11 @@ int TCPConnection::send_message(const char* data, int len, int message_id) {
 }
 
 void TCPConnection::clear() {
+  // destruction hook function
+  if (TcpServer::_destruct_hook != nullptr) {
+    TcpServer::_destruct_hook(this, TcpServer::_destruct_hook_args);
+  }
   // remove from tcp_server connections
-  std::cout << "connection::clear\n";
   TcpServer::remove_connection(_conn_fd);
   _event_loop->del_io_event(_conn_fd);
 

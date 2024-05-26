@@ -14,6 +14,7 @@
 
 class TcpServer {
  public:
+  friend class TCPConnection;
   TcpServer(EventLoop* loop, const char* ip, std::uint16_t port);
   ~TcpServer();
   void handle_accept();
@@ -37,6 +38,12 @@ class TcpServer {
   static void call_router(int msg_id, uint32_t len, const char* data,
                           NetConnection* conn);
 
+  // construct and destruct hook function
+  static void set_construct_hook(connection_callback hook,
+                                 void* args = nullptr);
+
+  static void set_destruct_hook(connection_callback hook, void* args = nullptr);
+
  private:
   int _sockfd;
   struct sockaddr_in _connection_addr;
@@ -45,11 +52,17 @@ class TcpServer {
   // eventLoop
   EventLoop* _loop;
 
-  // router handler
-  static message_router _router;
-
  private:
   // TODO 从配置文件中读取
+  // router handler
+  static message_router _router;
+  // hook function
+  static connection_callback _construct_hook;
+  static void* _construct_hook_args;
+
+  static connection_callback _destruct_hook;
+  static void* _destruct_hook_args;
+
 #define MAX_CONNS 2
   static std::mutex _mutex;
 
