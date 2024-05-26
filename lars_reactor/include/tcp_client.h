@@ -17,8 +17,11 @@ class TCPClient : public NetConnection {
 
   void clear();
 
-  // set event callback
-  void set_callback(message_callback cb) { this->_message_cb = cb; }
+  // register router
+  void add_message_router(int msg_id, message_callback handler,
+                          void* args = nullptr) {
+    _router.register_router(msg_id, handler, args);
+  }
 
  private:
   void handle_connect();
@@ -35,9 +38,9 @@ class TCPClient : public NetConnection {
   sockaddr_in _server_addr;
   socklen_t _addr_len;
   EventLoop* _loop;
-  // handler
-  message_callback _message_cb;
   // buffer
   InputBuffer _input_buf;
   OutputBuffer _output_buf;
+  // router
+  message_router _router;
 };

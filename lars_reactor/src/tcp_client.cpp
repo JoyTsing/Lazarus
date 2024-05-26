@@ -14,9 +14,8 @@
 #include "message.h"
 
 TCPClient::TCPClient(EventLoop* loop, const char* ip, unsigned short port)
-    : _loop(loop) {
+    : _loop(loop), _router() {
   _sockfd = -1;
-  _message_cb = nullptr;
 
   bzero(&_server_addr, sizeof(_server_addr));
   _server_addr.sin_family = AF_INET;
@@ -92,10 +91,9 @@ void TCPClient::handle_read() {
     }
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    if (_message_cb != nullptr) {
-      _message_cb(_input_buf.data(), head.message_len, head.message_id, this,
-                  nullptr);  // 逆天，最后两个参数反了
-    }
+    // router
+    _router.call_router(head.message_id, head.message_len, _input_buf.data(),
+                        this);
     _input_buf.pop(head.message_len);
   }
   _input_buf.adjust();
@@ -131,7 +129,7 @@ void TCPClient::handle_connection_delay() {
   std::cout << "connect success\n";
   // handle
   const char* message = "hello from client";
-  int msgid = 2;
+  int msgid = 1;
   send_message(message, strlen(message), msgid);
   // add read event
   add_read_event(_sockfd);
