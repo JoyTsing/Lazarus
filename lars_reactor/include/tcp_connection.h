@@ -1,18 +1,19 @@
 #pragma once
 
 #include "event_loop.h"
+#include "net_connection.h"
 #include "reactor_buf.h"
 
 // using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
 
-class TCPConnection {
+class TCPConnection : public NetConnection {
  public:
   TCPConnection(int conn_fd, EventLoop* event_loop);
   ~TCPConnection();
   // clear
   void clear();
 
-  int send_message(const char* data, int len, int message_id);
+  int send_message(const char* data, int len, int message_id) override;
 
  private:
   /**

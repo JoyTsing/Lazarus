@@ -5,11 +5,14 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "tcp_connection.h"
+#include "net_connection.h"
 
-using message_callback_server =
+using message_callback =
     std::function<void(const char* data, std::uint32_t len, int message_id,
-                       TCPConnection* client, void* user_data)>;
+                       NetConnection* client, void* user_data)>;
+
+// typedef void message_callback(const char* data, uint32_t len, int msgid,
+//                               NetConnection* client, void* user_data);
 
 const constexpr short MESSAGE_HEAD_LEN = 8;
 const constexpr int MESSAGE_LENGTH_LIMIT = 65527;
@@ -22,8 +25,7 @@ struct message_head {
 // message router
 class message_router {
  public:
-  int register_router(int message_id, message_callback_server call_back,
-                      void* args) {
+  int register_router(int message_id, message_callback call_back, void* args) {
     if (_router.find(message_id) != _router.end()) {
       return -1;
     }
@@ -34,7 +36,7 @@ class message_router {
   }
 
   void call_router(int message_id, std::uint32_t msglen, const char* data,
-                   TCPConnection* conn) {
+                   NetConnection* conn) {
     if (_router.find(message_id) == _router.end()) {
       std::cout << "message_id: " << message_id << " not found" << std::endl;
       return;
@@ -45,6 +47,6 @@ class message_router {
 
  private:
   // router deliver
-  std::unordered_map<int, message_callback_server> _router;
+  std::unordered_map<int, message_callback> _router;
   std::unordered_map<int, void*> _args;
 };

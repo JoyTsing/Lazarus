@@ -4,7 +4,7 @@
 class ReactorBuffer {
  public:
   ReactorBuffer();
-  ~ReactorBuffer();
+  virtual ~ReactorBuffer();
 
   void pop(int len);
   void clear();

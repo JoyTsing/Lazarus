@@ -5,24 +5,20 @@
 
 #include "event_loop.h"
 #include "message.h"
+#include "net_connection.h"
 #include "reactor_buf.h"
 
-class TCPClient;
-using message_callback =
-    std::function<void(const char* data, std::uint32_t len, int message_id,
-                       TCPClient* client, void* user_data)>;
-
-class TCPClient {
+class TCPClient : public NetConnection {
  public:
   TCPClient(EventLoop* loop, const char* ip, unsigned short port);
 
   // send
-  int send_message(const char* data, int len, int message_id);
+  int send_message(const char* data, int len, int message_id) override;
 
   void clear();
 
   // set event callback
-  void set_callback(message_callback cb) { _message_cb = cb; }
+  void set_callback(message_callback cb) { this->_message_cb = cb; }
 
  private:
   void handle_connect();

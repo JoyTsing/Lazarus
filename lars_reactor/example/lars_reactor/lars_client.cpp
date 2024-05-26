@@ -1,9 +1,10 @@
 #include <cstdio>
 
 #include "event_loop.h"
+#include "net_connection.h"
 #include "tcp_client.h"
 // 客户端业务
-void handle(const char *data, uint32_t len, int msgid, TCPClient *conn,
+void handle(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
             void *user_data) {
   // 得到服务端回执的数据
   printf("recv server: [%s]\n", data);
