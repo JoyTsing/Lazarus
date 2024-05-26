@@ -81,8 +81,8 @@ void TCPConnection::handle_read() {
     }
     // 3 handle message
     _input_buf.pop(MESSAGE_HEAD_LEN);
-    handle_test(_input_buf.data(), head.message_len, head.message_id, nullptr,
-                this);
+    TcpServer::call_router(head.message_id, head.message_len, _input_buf.data(),
+                           this);
     _input_buf.pop(head.message_len);
   }
   _input_buf.adjust();

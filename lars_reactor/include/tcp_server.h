@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "event_loop.h"
+#include "message.h"
 #include "tcp_connection.h"
 
 class TcpServer {
@@ -16,10 +17,25 @@ class TcpServer {
   TcpServer(EventLoop* loop, const char* ip, std::uint16_t port);
   ~TcpServer();
   void handle_accept();
+
+  void add_message_router(int msg_id, message_callback handler,
+                          void* args = nullptr);
+
   // connections
   static void add_connection(int conn_fd, TCPConnection* conn);
   static void remove_connection(int conn_fd);
   static int get_connection_num();
+
+  /**
+   * @brief 用来处理注册过的消息的路由函数
+   *
+   * @param data
+   * @param len
+   * @param msg_id
+   * @param conn
+   */
+  static void call_router(int msg_id, uint32_t len, const char* data,
+                          NetConnection* conn);
 
  private:
   int _sockfd;
@@ -28,6 +44,9 @@ class TcpServer {
 
   // eventLoop
   EventLoop* _loop;
+
+  // router handler
+  static message_router _router;
 
  private:
   // TODO 从配置文件中读取

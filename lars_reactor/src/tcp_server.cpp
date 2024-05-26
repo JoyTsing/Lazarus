@@ -12,12 +12,14 @@
 #include <iostream>
 #include <mutex>
 
+#include "message.h"
 #include "tcp_connection.h"
 
 // using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
 int TcpServer::_max_conns = 0;
 std::mutex TcpServer::_mutex;
 std::unordered_map<int, TCPConnection *> TcpServer::_conns;
+message_router TcpServer::_router;
 
 TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
     : _loop(loop) {
@@ -114,6 +116,16 @@ void TcpServer::handle_accept() {
     }
     break;
   }
+}
+
+void TcpServer::call_router(int msg_id, uint32_t len, const char *data,
+                            NetConnection *conn) {
+  _router.call_router(msg_id, len, data, conn);
+}
+
+void TcpServer::add_message_router(int msg_id, message_callback handler,
+                                   void *args) {
+  _router.register_router(msg_id, handler, args);
 }
 
 void TcpServer::add_connection(int conn_fd, TCPConnection *conn) {

@@ -131,7 +131,7 @@ void TCPClient::handle_connection_delay() {
   std::cout << "connect success\n";
   // handle
   const char* message = "hello from client";
-  int msgid = 1;
+  int msgid = 2;
   send_message(message, strlen(message), msgid);
   // add read event
   add_read_event(_sockfd);
