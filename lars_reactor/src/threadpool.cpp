@@ -1,9 +1,11 @@
 #include "threadpool.h"
 
+#include <iostream>
 #include <thread>
 
 #include "event_loop.h"
 #include "task_message.h"
+#include "tcp_connection.h"
 
 /**
  * @brief 监听task是否收到消息，收到消息则读出消息队列里的消息并进行处理
@@ -25,11 +27,18 @@ void deal_task(EventLoop* el, int fd, void* args) {
     switch (task.type) {
       case task_message::TaskType::NEW_CONNECTION: {
         // 新连接
-
+        TCPConnection* conn = new TCPConnection(std::get<int>(task.data), el);
+        // 创建链接，同时讲这个链接加入到event_loop中
+        if (conn == nullptr) {
+          std::cerr << "new connection error" << std::endl;
+          break;
+        }
+        std::cout << "new connection: " << std::get<int>(task.data)
+                  << std::endl;
         break;
       }
       case task_message::TaskType::NEW_TASK: {
-        // 新任务
+        // TODO 新任务
 
         break;
       }
@@ -48,7 +57,7 @@ void thread_loop(void* args) {
   loop->event_process();
 }
 
-ThreadPool::ThreadPool(int thread_num) : _thread_num(thread_num) {
+ThreadPool::ThreadPool(int thread_num) : _thread_num(thread_num), _index(0) {
   if (_thread_num <= 0) {
     _thread_num = 5;
   }
@@ -58,4 +67,11 @@ ThreadPool::ThreadPool(int thread_num) : _thread_num(thread_num) {
     std::thread t(thread_loop, _queues[i]);
     t.detach();
   }
+}
+
+ThreadQueue<task_message>* ThreadPool::get_thread_queue() {
+  if (_index == _thread_num) {
+    _index = 0;
+  }
+  return _queues[_index++];
 }

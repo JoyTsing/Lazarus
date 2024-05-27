@@ -11,7 +11,7 @@
  *
  */
 
-struct task_data {
+struct task_func {
   std::function<void(EventLoop* loop, void* args)> task;
   void* args;
 };
@@ -26,5 +26,5 @@ struct task_message {
   // 任务数据：
   // 1.新建立的链接则是fd
   // 2.正常任务则是回调函数和参数
-  std::variant<int, task_data> data;
+  std::variant<int, task_func> data;
 };

@@ -14,9 +14,13 @@
 
 #include "message.h"
 #include "net_connection.h"
+#include "task_message.h"
 #include "tcp_connection.h"
+#include "thread_queue.h"
 
 // using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
+
+// static source init
 int TcpServer::_max_conns = 0;
 std::mutex TcpServer::_mutex;
 std::unordered_map<int, TCPConnection *> TcpServer::_conns;
@@ -76,7 +80,10 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
 
   // init connection number
   _max_conns = MAX_CONNS;
-
+  // init thread pool
+  // TODO 从配置文件中读取
+  int thread_num = 5;
+  _threadpool = new ThreadPool(thread_num);
   // 注册socket读事件accept到eventLoop
   _loop->add_io_event(
       _sockfd, EPOLLIN,
@@ -117,7 +124,17 @@ void TcpServer::handle_accept() {
       std::cerr << "tcp::server connection num is max\n";
       close(connection_fd);
     } else {
-      new TCPConnection(connection_fd, _loop);
+      if (_threadpool != nullptr) {
+        // 获取thread_queue
+        auto queue = _threadpool->get_thread_queue();
+        task_message task;
+        task.type = task_message::TaskType::NEW_CONNECTION;
+        task.data = connection_fd;
+        // conn_fd 传递给线程池
+        queue->send(task);
+      } else {
+        new TCPConnection(connection_fd, _loop);
+      }
     }
     break;
   }

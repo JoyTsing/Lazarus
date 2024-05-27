@@ -11,12 +11,15 @@
 #include "event_loop.h"
 #include "message.h"
 #include "tcp_connection.h"
+#include "threadpool.h"
 
 class TcpServer {
  public:
   friend class TCPConnection;
+
   TcpServer(EventLoop* loop, const char* ip, std::uint16_t port);
   ~TcpServer();
+
   void handle_accept();
 
   void add_message_router(int msg_id, message_callback handler,
@@ -68,4 +71,7 @@ class TcpServer {
 
   static int _max_conns;  // 最大client链接个数
   static std::unordered_map<int, TCPConnection*> _conns;
+
+  // 链接池
+  ThreadPool* _threadpool;
 };

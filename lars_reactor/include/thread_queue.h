@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <cstdio>
+#include <iostream>
 #include <mutex>
 #include <queue>
 
@@ -16,7 +17,7 @@ class ThreadQueue {
     // 创建一个event_fd用于监听，没有跟socket和文件描述符关联
     _fd = eventfd(0, EFD_NONBLOCK);
     if (_fd == -1) {
-      perror("eventfd() create error");
+      std::cerr << "eventfd() create error\n";
       exit(1);
     }
   }
@@ -35,7 +36,7 @@ class ThreadQueue {
     uint64_t one = 1;
     int ret = write(_fd, &one, sizeof(one));
     if (ret == -1) {
-      perror("write() error");
+      std::cerr << "write() error\n";
       exit(1);
     }
   }
@@ -51,7 +52,7 @@ class ThreadQueue {
     uint64_t one;
     int ret = read(_fd, &one, sizeof(one));
     if (ret == -1) {
-      perror("read() error");
+      std::cerr << "read() error";
       exit(1);
     }
     // 交换队列
