@@ -6,7 +6,7 @@
 void handle(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
             void *user_data) {
   // 得到服务端回执的数据
-  printf("===>server callback\n");
+  printf("  ===>udp server callback\n");
   // 发送数据给服务端
   conn->send_message(data, len, msgid);
 }
