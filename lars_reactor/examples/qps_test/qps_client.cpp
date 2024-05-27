@@ -1,5 +1,8 @@
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <thread>
+#include <vector>
 
 #include "echoMessage.pb.h"
 #include "eventloop/event_loop.h"
@@ -35,7 +38,7 @@ void qps_test_handle(const char *data, std::uint32_t len, int msgid,
   // 当前时间
   long current_time = time(NULL);
   if (current_time - qps->last_time >= 1) {
-    minilog::log_info("QPS : [{}]", qps->succ_cnt);
+    printf("QPS : [%d]\n", qps->succ_cnt);
     qps->succ_cnt = 0;
     qps->last_time = current_time;
   }
@@ -59,12 +62,24 @@ void on_client_build(NetConnection *conn, void *args) {
   conn->send_message(request_str.c_str(), request_str.size(), msgid);
 }
 
-int main() {
+void thread_handle() {
   EventLoop loop;
   Qps qps;
   TCPClient client(&loop, "127.0.0.1", 7777);
   client.add_message_router(1, qps_test_handle, (void *)&qps);
   client.set_construct_hook(on_client_build);
   loop.event_process();
+}
+
+int main(int argc, const char **argv) {
+  if (argc == 1) {
+    std::cout << "Usage : ./qps_client [threadNum]\n";
+    return 0;
+  }
+  int thread_num = atoi(argv[1]);
+  std::vector<std::jthread> threads(thread_num);
+  for (int i = 0; i < thread_num; i++) {
+    threads[i] = std::jthread(thread_handle);
+  }
   return 0;
 }

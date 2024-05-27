@@ -26,8 +26,6 @@ class message_router {
     if (_router.find(message_id) != _router.end()) {
       return -1;
     }
-    minilog::log_info("register router function for message_id [{}]",
-                      message_id);
     _router[message_id] = call_back;
     _args[message_id] = args;
     return 0;
