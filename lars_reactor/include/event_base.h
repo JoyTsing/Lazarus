@@ -2,11 +2,12 @@
 
 #include <functional>
 
+class EventLoop;
+using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
+
 #include "event_loop.h"
 
-class EventLoop;
-
-using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
+#define IO_EVENT_ARGUMENT EventLoop *el, int fd, void *args
 
 struct IOEvent {
   IOEvent()

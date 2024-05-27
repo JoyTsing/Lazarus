@@ -8,8 +8,6 @@
 
 struct IOEvent;
 
-#define IO_EVENT_ARGUMENT EventLoop *el, int fd, void *args
-
 using io_event_map = std::unordered_map<int, IOEvent>;
 using io_event_map_iter = io_event_map::iterator;
 using listen_fd_set = std::unordered_set<int>;
