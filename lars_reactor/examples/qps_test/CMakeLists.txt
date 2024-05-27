@@ -9,7 +9,7 @@ list(APPEND CMAKE_PREFIX_PATH "${Protobuf_PREFIX_PATH}")
 
 set(protobuf_MODULE_COMPATIBLE true)
 
-find_package(Protobuf 3.21.12 REQUIRED)
+find_package(Protobuf REQUIRED)
 message(STATUS "Using Protobuf ${Protobuf_VERSION}")
 
 include_directories(${Protobuf_INCLUDE_DIRS})
