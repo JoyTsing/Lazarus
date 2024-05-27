@@ -1,5 +1,6 @@
 #include <cstring>
 
+#include "config_file.h"
 #include "tcp_server.h"
 
 void handle(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
@@ -34,7 +35,13 @@ void on_client_lost(NetConnection *conn, void *args) {
 
 int main(int argc, const char **argv) {
   EventLoop loop;
-  TcpServer server(&loop, "127.0.0.1", 7777);
+  config_file::setPath("./example/lars_reactor/server.conf");
+
+  std::string ip =
+      config_file::instance()->GetString("reactor", "ip", "0.0.0.0");
+  short port = config_file::instance()->GetNumber("reactor", "port", 7777);
+
+  TcpServer server(&loop, ip.c_str(), port);
   // 设置hook函数
   server.add_message_router(1, handle);
   server.add_message_router(2, handle2);

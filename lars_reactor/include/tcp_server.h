@@ -56,7 +56,6 @@ class TcpServer {
   EventLoop* _loop;
 
  private:
-  // TODO 从配置文件中读取
   // router handler
   static message_router _router;
   // hook function
@@ -66,7 +65,6 @@ class TcpServer {
   static connection_callback _destruct_hook;
   static void* _destruct_hook_args;
 
-#define MAX_CONNS 2
   static std::mutex _mutex;
 
   static int _max_conns;  // 最大client链接个数

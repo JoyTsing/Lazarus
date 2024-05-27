@@ -12,6 +12,7 @@
 #include <iostream>
 #include <mutex>
 
+#include "config_file.h"
 #include "message.h"
 #include "net_connection.h"
 #include "task_message.h"
@@ -79,10 +80,11 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
   }
 
   // init connection number
-  _max_conns = MAX_CONNS;
+  _max_conns =
+      config_file::instance()->GetNumber("reactor", "maxConnection", 512);
   // init thread pool
-  // TODO 从配置文件中读取
-  int thread_num = 5;
+  int thread_num =
+      config_file::instance()->GetNumber("reactor", "threadNum", 5);
   _threadpool = new ThreadPool(thread_num);
   // 注册socket读事件accept到eventLoop
   _loop->add_io_event(
