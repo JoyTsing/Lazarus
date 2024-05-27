@@ -70,7 +70,7 @@ ThreadPool::ThreadPool(int thread_num) : _thread_num(thread_num), _index(0) {
 }
 
 ThreadQueue<task_message>* ThreadPool::get_thread_queue() {
-  if (_index == _thread_num) {
+  if (_index == _thread_num - 1) {
     _index = 0;
   }
   return _queues[_index++];
