@@ -1,5 +1,6 @@
 file(GLOB_RECURSE all_tests *.cpp)
 file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
+
 configure_file(${PROJECT_SOURCE_DIR}/conf/server.conf ./conf/server.conf COPYONLY)
 
 foreach(v ${all_tests})
@@ -8,4 +9,5 @@ foreach(v ${all_tests})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
   add_executable(${target_name} ${v} ${all_src})
+  target_link_libraries(${target_name} PUBLIC Backward::Backward Backward::Object)
 endforeach()

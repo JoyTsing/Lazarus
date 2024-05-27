@@ -6,12 +6,12 @@
 #include <unistd.h>
 
 #include <cstring>
-#include <iostream>
 
 #include "buffer/reactor_buf.h"
 #include "eventloop/event_loop.h"
 #include "message/message.h"
 #include "net/tcp/tcp_server.h"
+#include "utils/minilog.h"
 
 void handle_test(const char* data, uint32_t len, int msgid, void* args,
                  TCPConnection* conn) {
@@ -63,10 +63,11 @@ void TCPConnection::handle_read() {
   // 1 read data from connection fd
   int ret = _input_buf.read_data(_conn_fd);
   if (ret == -1) {
+    minilog::log_error("tcp::connection read data error");
     clear();
     return;
   } else if (ret == 0) {
-    std::cerr << "connection closed by peer\n";
+    minilog::log_info("connection closed by peer");
     clear();
     return;
   }
@@ -121,14 +122,14 @@ int TCPConnection::send_message(const char* data, int len, int message_id) {
   head.message_len = len;
   int ret = _output_buf.add_data((const char*)&head, MESSAGE_HEAD_LEN);
   if (ret != 0) {
-    std::cerr << "send head error\n";
+    minilog::log_error("tcp::connection send head error");
     return -1;
   }
   // data
   ret = _output_buf.add_data(data, len);
   if (ret != 0) {
     _output_buf.pop(MESSAGE_HEAD_LEN);
-    std::cerr << "send head error\n";
+    minilog::log_error("tcp::connection send_message error");
     return -1;
   }
   // register write event

@@ -1,5 +1,3 @@
-find_package(Boost REQUIRED)
-
 file(GLOB_RECURSE all_tests *.cpp)
 file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
 

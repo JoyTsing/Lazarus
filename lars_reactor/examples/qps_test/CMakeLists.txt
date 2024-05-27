@@ -7,7 +7,10 @@ set(Protobuf_PREFIX_PATH
 
 list(APPEND CMAKE_PREFIX_PATH "${Protobuf_PREFIX_PATH}")
 
+set(protobuf_MODULE_COMPATIBLE true)
+
 find_package(Protobuf 3.21.12 REQUIRED)
+message(STATUS "Using Protobuf ${Protobuf_VERSION}")
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(./pb)
@@ -23,5 +26,5 @@ foreach(v ${all_tests})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
   add_executable(${target_name} ${v} ${all_src})
-  target_link_libraries(${target_name} PUBLIC ${Protobuf_LIBRARIES})
+  target_link_libraries(${target_name} PUBLIC ${Protobuf_LIBRARIES} Backward::Backward Backward::Object)
 endforeach()

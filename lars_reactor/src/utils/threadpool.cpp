@@ -1,11 +1,11 @@
 #include "utils/threadpool.h"
 
-#include <iostream>
 #include <thread>
 
 #include "eventloop/event_loop.h"
 #include "message/task_message.h"
 #include "net/tcp/tcp_connection.h"
+#include "utils/minilog.h"
 
 /**
  * @brief 监听task是否收到消息，收到消息则读出消息队列里的消息并进行处理
@@ -30,11 +30,10 @@ void deal_task(EventLoop* el, int fd, void* args) {
         TCPConnection* conn = new TCPConnection(std::get<int>(task.data), el);
         // 创建链接，同时讲这个链接加入到event_loop中
         if (conn == nullptr) {
-          std::cerr << "new connection error" << std::endl;
+          minilog::log_error("new connection error");
           break;
         }
-        std::cout << "new connection: " << std::get<int>(task.data)
-                  << std::endl;
+        minilog::log_info("new connection: [{}]", std::get<int>(task.data));
         break;
       }
       case task_message::TaskType::NEW_TASK: {

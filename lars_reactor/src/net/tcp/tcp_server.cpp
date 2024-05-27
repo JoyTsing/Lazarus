@@ -9,7 +9,6 @@
 #include <cerrno>
 #include <csignal>
 #include <cstring>
-#include <iostream>
 #include <mutex>
 
 #include "message/message.h"
@@ -17,6 +16,7 @@
 #include "net/net_connection.h"
 #include "net/tcp/tcp_connection.h"
 #include "utils/config_file.h"
+#include "utils/minilog.h"
 #include "utils/thread_queue.h"
 
 // using io_call_back = std::function<void(EventLoop* el, int fd, void* args)>;
@@ -41,18 +41,18 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
   // SIGPIPE:如果客户端关闭，服务端再次write就会产生
   // SIGHUP:如果terminal关闭，会给当前进程发送该信号
   if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
-    std::cerr << "signal ignore SIGHUP error\n";
+    minilog::log_error("signal ignore SIGHUP error");
   }
 
   if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-    std::cerr << "signal ignore SIGPIPE error\n";
+    minilog::log_error("signal ignore SIGPIPE error");
   }
 
   // Create a socket
   _sockfd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
   // Check if the socket was created successfully
   if (_sockfd == -1) {
-    std::cerr << "tcp::server socket() error\n";
+    minilog::log_error("tcp::server socket() error");
     exit(1);
   }
   // init connection address
@@ -65,18 +65,18 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
   // set socket CAN REUSE
   int op = 1;
   if (setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-    std::cerr << "tcp::server setsockopt() error\n";
+    minilog::log_error("tcp::server setsockopt() error");
     exit(1);
   }
 
   // bind the port
   if (bind(_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-    std::cerr << "tcp::server bind() error\n";
+    minilog::log_error("tcp::server bind() error");
     exit(1);
   }
   // listen
   if (listen(_sockfd, 1024) == -1) {
-    std::cerr << "tcp::server listen() error\n";
+    minilog::log_error("tcp::server listen() error");
     exit(1);
   }
 
@@ -111,20 +111,20 @@ void TcpServer::handle_accept() {
         continue;
       } else if (errno == EAGAIN) {
         // 如果是非阻塞模式，且没有连接，返回EAGAIN
-        std::cerr << "tcp::server accept() error EAGAIN\n";
+        minilog::log_error("tcp::server accept() error EAGAIN");
         break;
       } else if (errno == EMFILE) {
         // 链接过多了
-        std::cerr << "tcp::server accept() error EMFILE\n";
+        minilog::log_error("tcp::server accept() error EMFILE");
         continue;
       } else {
-        std::cerr << "tcp::server accept() error\n";
+        minilog::log_error("tcp::server accept() error");
         exit(1);
       }
     }
     // accept success
     if (get_connection_num() >= _max_conns) {
-      std::cerr << "tcp::server connection num is max\n";
+      minilog::log_error("tcp::server connection num is max");
       close(connection_fd);
     } else {
       if (_threadpool != nullptr) {
@@ -171,7 +171,7 @@ void TcpServer::add_connection(int conn_fd, TCPConnection *conn) {
 void TcpServer::remove_connection(int conn_fd) {
   std::lock_guard<std::mutex> lock(_mutex);
   if (_conns.find(conn_fd) != _conns.end()) {
-    std::cout << "remove connection: " << conn_fd << "\n";
+    minilog::log_info("remove connection: {}", conn_fd);
     _conns.erase(conn_fd);
   }
 }

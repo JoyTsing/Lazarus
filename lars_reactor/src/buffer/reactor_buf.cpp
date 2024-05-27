@@ -5,10 +5,10 @@
 
 #include <cassert>
 #include <cstring>
-#include <iostream>
 
 #include "buffer/buffer_pool.h"
 #include "buffer/io_buf.h"
+#include "utils/minilog.h"
 
 ReactorBuffer::ReactorBuffer() : _buffer(nullptr) {}
 
@@ -40,7 +40,7 @@ int ReactorBuffer::length() {
 int InputBuffer::read_data(int fd) {
   int need_read;
   if (ioctl(fd, FIONREAD, &need_read) == -1) {
-    std::cerr << "ioctl error\n";
+    minilog::log_error("ioctl error");
     return -1;
   }
 

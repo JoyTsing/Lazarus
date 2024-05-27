@@ -1,10 +1,10 @@
 #include "buffer/buffer_pool.h"
 
 #include <cassert>
-#include <iostream>
 #include <mutex>
 
 #include "buffer/io_buf.h"
+#include "utils/minilog.h"
 
 void BufferPool::init_buffer_unit(int size, MEM_CAP page_size) {
   IOBuffer* prev = nullptr;
@@ -56,7 +56,7 @@ IOBuffer* BufferPool::alloc_buffer(int size) {
   } else if (size <= mem_cap_to_int(MEM_CAP::m8M)) {
     mem_size = mem_cap_to_int(MEM_CAP::m8M);
   } else {
-    std::cerr << "too larger size for buffer pool\n";
+    minilog::log_error("too larger size for buffer pool");
     return nullptr;
   }
 
@@ -64,7 +64,7 @@ IOBuffer* BufferPool::alloc_buffer(int size) {
   std::lock_guard<std::mutex> lock(_mutex);
   if (_pool[mem_size] == nullptr) {
     [[unlikely]] if (_total_mem + mem_size >= MEM_LIMIT) {
-      std::cerr << "buffer pool no enough memory\n";
+      minilog::log_error("buffer pool no enough memory");
       return nullptr;
     }
     IOBuffer* buf = new IOBuffer(mem_size);

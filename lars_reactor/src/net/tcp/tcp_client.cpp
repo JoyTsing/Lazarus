@@ -8,10 +8,10 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 
 #include "eventloop/event_loop.h"
 #include "message/message.h"
+#include "utils/minilog.h"
 
 TCPClient::TCPClient(EventLoop* loop, const char* ip, unsigned short port)
     : _loop(loop),
@@ -42,7 +42,7 @@ int TCPClient::send_message(const char* data, int len, int message_id) {
   // add head to output buffer
   int ret = _output_buf.add_data((const char*)&head, MESSAGE_HEAD_LEN);
   if (ret != 0) {
-    std::cerr << "send head error\n";
+    minilog::log_error("tcp::client send head error");
     return -1;
   }
   ret = _output_buf.add_data(data, len);
@@ -75,11 +75,11 @@ void TCPClient::handle_read() {
   // 1 read data from connection fd
   int ret = _input_buf.read_data(_sockfd);
   if (ret == -1) {
-    std::cerr << "TcpClient::handle_read read data from socket error\n";
+    minilog::log_error("TcpClient::handle_read read data from socket error");
     clear();
     exit(1);
   } else if (ret == 0) {
-    std::cerr << "connection closed by peer\n";
+    minilog::log_info("connection closed by peer");
     clear();
     exit(1);
   }
@@ -130,7 +130,7 @@ void TCPClient::handle_connection_delay() {
   getsockopt(_sockfd, SOL_SOCKET, SO_ERROR, &res, &len);
   if (res != 0) {
     // handle error
-    std::cerr << "client connect error\n";
+    minilog::log_error("client connect error");
     exit(1);
   }
   // handle hook-connection
@@ -172,7 +172,7 @@ void TCPClient::handle_connect() {
       socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_TCP);
   if (_sockfd == -1) {
     // handle error
-    std::cerr << "client create socket error\n";
+    minilog::log_error("client create socket error");
     exit(1);
   }
   int ret = connect(_sockfd, (const struct sockaddr*)&_server_addr, _addr_len);
@@ -191,7 +191,7 @@ void TCPClient::handle_connect() {
       return;
     } else {
       // handle error
-      std::cerr << "client connect error\n";
+      minilog::log_error("client connect error");
       exit(1);
     }
   }

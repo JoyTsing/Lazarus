@@ -4,14 +4,14 @@
 
 #include <cassert>
 #include <cstddef>
-#include <iostream>
 
 #include "eventloop/event_base.h"
+#include "utils/minilog.h"
 
 EventLoop::EventLoop() {
   _epoll_fd = epoll_create1(0);
   if (_epoll_fd == -1) {
-    std::cerr << "EventLoop::EventLoop epoll_create1 failed";
+    minilog::log_error("EventLoop::EventLoop epoll_create1 failed");
     exit(1);
   }
 }
@@ -43,9 +43,9 @@ void EventLoop::event_process() {
           event->write_callback(this, fd, args);
         } else {
           // 从epoll中去掉
-          std::cerr
-              << "EventLoop::event_process EPOLLERR | EPOLLHUP, remove fd: "
-              << fd << "\n";
+          minilog::log_error(
+              "EventLoop::event_process EPOLLERR | EPOLLHUP, remove fd: {}",
+              fd);
           del_io_event(fd);
         }
       }
@@ -82,7 +82,7 @@ void EventLoop::add_io_event(int fd, int mask, io_call_back proc, void* args) {
   ev.data.fd = fd;
   ev.events = final_mask;
   if (epoll_ctl(_epoll_fd, op, fd, &ev) == -1) {
-    std::cerr << "EventLoop::add_io_event epoll_ctl failed\n";
+    minilog::log_error("EventLoop::add_io_event epoll_ctl failed");
     return;
   }
   // 4添加到正在监听的fd中
@@ -105,7 +105,7 @@ void EventLoop::del_io_event(int fd, int mask) {
   int& final_mask = it->second.mask;
   final_mask = final_mask & (~mask);
   if (final_mask == 0) {
-    std::cout << "del io event\n";
+    minilog::log_info("EventLoop::del_io_event {}", fd);
     del_io_event(fd);
   } else {
     epoll_event ev;
