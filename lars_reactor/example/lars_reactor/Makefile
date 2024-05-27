@@ -6,7 +6,8 @@ LIB=-L../../lib -lreactor
 
 all:
 	$(CXX) -o server $(CFLAGS)  lars_reactor.cpp $(INC) $(LIB)
+	$(CXX) -o udp_server $(CFLAGS)  lars_reactor_udp.cpp $(INC) $(LIB)
 	$(CXX) -o client $(CFLAGS)  lars_client.cpp $(INC) $(LIB)
 
 clean:
-	-rm -f *.o server client
+	-rm -f *.o server client udp_server

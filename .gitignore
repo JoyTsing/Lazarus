@@ -41,4 +41,6 @@
 compile_commands.json
 server
 client
+udp_server
+udp_client
 # End of https://www.toptal.com/developers/gitignore/api/c++

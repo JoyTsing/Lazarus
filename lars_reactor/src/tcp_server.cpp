@@ -36,6 +36,7 @@ void *TcpServer::_destruct_hook_args = nullptr;
 TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
     : _loop(loop) {
   bzero(&_connection_addr, sizeof(_connection_addr));
+  _connection_addr_len = sizeof(_connection_addr);
   // 忽略一些信号 SIGHUP, SIGPIPE
   // SIGPIPE:如果客户端关闭，服务端再次write就会产生
   // SIGHUP:如果terminal关闭，会给当前进程发送该信号
