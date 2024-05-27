@@ -165,7 +165,6 @@ void TcpServer::add_message_router(int msg_id, message_callback handler,
 
 void TcpServer::add_connection(int conn_fd, TCPConnection *conn) {
   std::lock_guard<std::mutex> lock(_mutex);
-  std::cout << "add connection: " << conn_fd << "\n";
   _conns[conn_fd] = conn;
 }
 

@@ -31,8 +31,6 @@ TCPClient::TCPClient(EventLoop* loop, const char* ip, unsigned short port)
 }
 
 int TCPClient::send_message(const char* data, int len, int message_id) {
-  std::cerr << "send message: " << data << ", len: " << len
-            << ", id: " << message_id << "\n";
   bool active_epollout = false;
   if (_output_buf.length() == 0) {
     active_epollout = true;
@@ -85,7 +83,6 @@ void TCPClient::handle_read() {
     clear();
     exit(1);
   }
-  std::cout << "TcpClient::handle_read\n";
   // 2 check if data is ready to read aka. at least 8 bytes(message header)
   message_head head;
   while (_input_buf.length() >= MESSAGE_HEAD_LEN) {
@@ -111,7 +108,6 @@ void TCPClient::handle_read() {
 }
 
 void TCPClient::handle_write() {  // 此时output buffer中有数据
-  std::cout << "TcpClient::handle_write\n";
   while (_output_buf.length() > 0) {
     int ret = _output_buf.write_to(_sockfd);
     if (ret == -1) {

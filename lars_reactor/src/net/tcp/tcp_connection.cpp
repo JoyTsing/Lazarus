@@ -63,7 +63,6 @@ void TCPConnection::handle_read() {
   // 1 read data from connection fd
   int ret = _input_buf.read_data(_conn_fd);
   if (ret == -1) {
-    std::cerr << "read data error\n";
     clear();
     return;
   } else if (ret == 0) {
@@ -111,10 +110,6 @@ void TCPConnection::handle_write() {
 }
 
 int TCPConnection::send_message(const char* data, int len, int message_id) {
-  std::cerr << "====TCPConnection::send_message\n"
-            << "  data: " << data << "\n"
-            << "  len: " << len << "\n"
-            << "  id: " << message_id << "\n";
   bool epollout = false;
   if (_output_buf.length() == 0) {
     // when output buffer is empty, we need to register write event

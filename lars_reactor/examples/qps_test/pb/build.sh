@@ -1,2 +1,2 @@
 #!/bin/sh
-protoc --cpp_out=. ./*.proto
+protoc-321 --cpp_out=. ./*.proto

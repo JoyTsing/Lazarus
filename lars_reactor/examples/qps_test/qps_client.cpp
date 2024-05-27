@@ -1,39 +1,70 @@
 #include <cstdio>
 #include <cstring>
 
+#include "echoMessage.pb.h"
 #include "eventloop/event_loop.h"
 #include "net/net_connection.h"
 #include "net/tcp/tcp_client.h"
+#include "utils/minilog.h"
 
-void handle(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
-            void *user_data) {
-  // 得到服务端回执的数据
-  printf("  callback handler\n");
-  printf("  recv from client: %s\n", data);
-  printf("  msgid: [%d]\n", msgid);
-  printf("  len: [%d]\n", len);
-  printf("====================================\n");
+struct Qps {
+  Qps() {
+    last_time = time(NULL);
+    succ_cnt = 0;
+  }
+
+  long last_time;  // 最后一次发包时间 ms为单位
+  int succ_cnt;    // 成功收到服务器回显的次数
+};
+
+// 性能测试
+void qps_test_handle(const char *data, std::uint32_t len, int msgid,
+                     NetConnection *conn, void *user_data) {
+  Qps *qps = (Qps *)user_data;
+  qps_test::EchoMessage request, response;
+  // 解析
+  if (response.ParseFromArray(data, len) == false) {
+    minilog::log_error("server call back data error");
+    return;
+  }
+  // 判断内容
+  if (response.content() == "hello world") {
+    // qps success
+    qps->succ_cnt++;
+  }
+  // 当前时间
+  long current_time = time(NULL);
+  if (current_time - qps->last_time >= 1) {
+    minilog::log_info("QPS : [{}]", qps->succ_cnt);
+    qps->succ_cnt = 0;
+    qps->last_time = current_time;
+  }
+  // 发送request给服务器
+  request.set_id(response.id() + 1);
+  request.set_content(response.content());
+
+  std::string request_str;
+  request.SerializeToString(&request_str);
+  conn->send_message(request_str.c_str(), request_str.size(), msgid);
 }
 
-// 新客户端创建后的回调函数
+// 链接创建后的回调函数
 void on_client_build(NetConnection *conn, void *args) {
+  qps_test::EchoMessage request;
+  request.set_id(1);
+  request.set_content("hello world");
+  std::string request_str;
+  request.SerializeToString(&request_str);
   int msgid = 1;
-  const char *msg = "hello darkness my old friend";
-  conn->send_message(msg, strlen(msg), msgid);
-}
-
-// 客户端断开后的回调函数
-void on_client_lost(NetConnection *conn, void *args) {
-  printf("=====>on client is lost\n");
+  conn->send_message(request_str.c_str(), request_str.size(), msgid);
 }
 
 int main() {
   EventLoop loop;
+  Qps qps;
   TCPClient client(&loop, "127.0.0.1", 7777);
-  client.add_message_router(1, handle);
-  client.add_message_router(200, handle);
+  client.add_message_router(1, qps_test_handle, (void *)&qps);
   client.set_construct_hook(on_client_build);
-  client.set_destruct_hook(on_client_lost);
   loop.event_process();
   return 0;
 }
