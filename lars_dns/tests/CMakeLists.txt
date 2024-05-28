@@ -8,5 +8,5 @@ foreach(v ${all_tests})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
   add_executable(${target_name} ${v} ${all_src})
-  target_link_libraries(${target_name} PUBLIC ${LARS_REACTOR_LIB} doctest nanobench)
+  target_link_libraries(${target_name} PUBLIC ${LARS_REACTOR_LIB} doctest nanobench mysqlclient)
 endforeach()
