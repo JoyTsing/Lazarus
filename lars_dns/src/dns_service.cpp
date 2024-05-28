@@ -1,3 +1,5 @@
+#include <mysql/mysql.h>
+
 #include <cstring>
 
 #include "eventloop/event_loop.h"
@@ -15,7 +17,8 @@ int main(int argc, const char **argv) {
   short port = config_file::instance()->GetNumber("reactor", "port", 7777);
 
   server = new TcpServer(&loop, ip.c_str(), port);
-
+  // 测试mysql能否链接
+  MYSQL *mysql = mysql_init(nullptr);
   loop.event_process();
   return 0;
 }
