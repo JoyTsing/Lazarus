@@ -27,6 +27,7 @@ void echo(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
           void *user_data) {
   // 直接回显
   conn->send_message(data, len, msgid);
+  printf("conn param: %s\n", (char *)conn->param);
 }
 
 void print(const char *data, std::uint32_t len, int msgid, NetConnection *conn,
@@ -46,6 +47,8 @@ void on_client_build(NetConnection *conn, void *args) {
   conn->send_message(msg, strlen(msg), msgid);
   // 每次用户创建链接成功之后执行一个任务
   server->get_threadpool()->send_task(print_lars_task);
+  const char *conn_param = "come form conn_param";
+  conn->param = (void *)conn_param;
 }
 
 // 客户端断开后的回调函数

@@ -9,6 +9,7 @@
 class NetConnection {
  public:
   virtual int send_message(const char* data, int len, int message_id) = 0;
+  void* param;  // 用来存放一些额外的动态参数
 };
 
 // construct and destruct hook function
