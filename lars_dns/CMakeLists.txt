@@ -19,5 +19,5 @@ include_directories(${LARS_REACTOR_INCLUDE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory(third-party/)
-add_subdirectory(examples/)
+add_subdirectory(src/)
 add_subdirectory(tests/)

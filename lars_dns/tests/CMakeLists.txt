@@ -1,5 +1,6 @@
 file(GLOB_RECURSE all_tests *.cpp)
 file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
+list(REMOVE_ITEM all_src ${PROJECT_SOURCE_DIR}/src/dns_service.cpp)
 
 foreach(v ${all_tests})
   string(REGEX MATCH "tests/.*" relative_path ${v})
