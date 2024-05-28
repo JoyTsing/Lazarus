@@ -16,7 +16,7 @@ include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(./pb)
 
 file(GLOB_RECURSE all_tests *.cpp)
-file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp ./pb/echoMessage.pb.cc)
+file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ./pb/echoMessage.pb.cc)
 
 configure_file(${PROJECT_SOURCE_DIR}/conf/server.conf ./conf/server.conf COPYONLY)
 
@@ -26,5 +26,5 @@ foreach(v ${all_tests})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
   add_executable(${target_name} ${v} ${all_src})
-  target_link_libraries(${target_name} PUBLIC ${Protobuf_LIBRARIES} Backward::Backward Backward::Object)
+  target_link_libraries(${target_name} PUBLIC reactor ${Protobuf_LIBRARIES} Backward::Backward Backward::Object)
 endforeach()

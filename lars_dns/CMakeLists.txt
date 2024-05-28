@@ -8,11 +8,16 @@ if(NOT CMAKE_BUILD_TYPE)
   message("Setting default build type to Debug")
 endif()
 
-project(lars_reactor VERSION 0.10 LANGUAGES CXX)
+project(lars_dns VERSION 0.1 LANGUAGES CXX)
 
+# lars_reactor
+get_filename_component(LARS_REACTOR_PATH ${PROJECT_SOURCE_DIR}/../lars_reactor ABSOLUTE)
+set(LARS_REACTOR_INCLUDE ${LARS_REACTOR_PATH}/include)
+set(LARS_REACTOR_LIB ${LARS_REACTOR_PATH}/build/src/libreactor.a)
+
+include_directories(${LARS_REACTOR_INCLUDE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory(third-party/)
-add_subdirectory(src/)
 add_subdirectory(examples/)
 add_subdirectory(tests/)
