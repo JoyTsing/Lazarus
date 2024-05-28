@@ -10,7 +10,7 @@ CREATE TABLE `RouteData` (
     `serverip` int(10) unsigned NOT NULL,
     `serverport` int(10) unsigned NOT NULL,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=116064 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `RouteVersion`;
