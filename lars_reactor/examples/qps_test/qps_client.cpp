@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -10,14 +11,18 @@
 #include "net/tcp/tcp_client.h"
 #include "utils/minilog.h"
 
+std::once_flag print;
+int thread_num;
 struct Qps {
   Qps() {
     last_time = time(NULL);
     succ_cnt = 0;
+    print_QPS = false;
   }
 
   long last_time;  // 最后一次发包时间 ms为单位
   int succ_cnt;    // 成功收到服务器回显的次数
+  bool print_QPS;
 };
 
 // 性能测试
@@ -37,8 +42,10 @@ void qps_test_handle(const char *data, std::uint32_t len, int msgid,
   }
   // 当前时间
   long current_time = time(NULL);
-  if (current_time - qps->last_time >= 1) {
-    printf("QPS : [%d]\n", qps->succ_cnt);
+  if (qps->print_QPS && current_time - qps->last_time >= 1) {
+    int server_qps = qps->succ_cnt * thread_num;
+    printf("Client AVG QPS : [%d], ThreadNums : [%d], Server QPS: [%d]\n",
+           qps->succ_cnt, thread_num, server_qps);
     qps->succ_cnt = 0;
     qps->last_time = current_time;
   }
@@ -65,6 +72,7 @@ void on_client_build(NetConnection *conn, void *args) {
 void thread_handle() {
   EventLoop loop;
   Qps qps;
+  std::call_once(print, [&]() { qps.print_QPS = true; });
   TCPClient client(&loop, "127.0.0.1", 7777);
   client.add_message_router(1, qps_test_handle, (void *)&qps);
   client.set_construct_hook(on_client_build);
@@ -76,7 +84,7 @@ int main(int argc, const char **argv) {
     std::cout << "Usage : ./qps_client [threadNum]\n";
     return 0;
   }
-  int thread_num = atoi(argv[1]);
+  thread_num = atoi(argv[1]);
   std::vector<std::jthread> threads(thread_num);
   for (int i = 0; i < thread_num; i++) {
     threads[i] = std::jthread(thread_handle);

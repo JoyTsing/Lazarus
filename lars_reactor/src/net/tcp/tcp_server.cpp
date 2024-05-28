@@ -95,6 +95,7 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
         server->handle_accept();
       },
       this);
+  minilog::log_info("tcp::server start...");
 }
 
 TcpServer::~TcpServer() { close(_sockfd); }
