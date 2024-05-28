@@ -8,6 +8,7 @@
 Router::Router() {
   connect_db();
   minilog::log_info("Router init");
+  // init router map from db
 }
 
 void Router::connect_db() {
@@ -37,4 +38,5 @@ void Router::connect_db() {
                        mysql_error(&_db_connection));
     exit(1);
   }
+  minilog::log_info("connect to mysql success");
 }
