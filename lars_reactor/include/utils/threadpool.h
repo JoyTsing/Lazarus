@@ -16,6 +16,14 @@ class ThreadPool {
    */
   ThreadQueue<task_message>* get_thread_queue();
 
+  /**
+   * @brief 发送一个NEW_TASK类型的task到线程池
+   *
+   * @param func
+   * @param args
+   */
+  void send_task(task_func func, void* args = nullptr);
+
  private:
   int _thread_num;
   int _index;

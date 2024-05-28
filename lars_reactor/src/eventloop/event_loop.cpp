@@ -50,6 +50,8 @@ void EventLoop::event_process() {
         }
       }
     }
+    // 全部fd读写事件执行完后的尾处理
+    process_tasks();
   }
 }
 void EventLoop::add_io_event(int fd, int mask, io_call_back proc, void* args) {
@@ -114,3 +116,18 @@ void EventLoop::del_io_event(int fd, int mask) {
     epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev);
   }
 }
+
+void EventLoop::add_task(const Task& task) { _ready_tasks.push_back(task); }
+
+void EventLoop::process_tasks() {
+  // 遍历执行
+  for (auto& task : _ready_tasks) {
+    auto func = task.task;
+    void* args = task.args;
+    func(this, args);
+  }
+  // 清空
+  _ready_tasks.clear();
+}
+
+const listen_fd_set& EventLoop::get_listen_fds() const { return _listen_fds; }

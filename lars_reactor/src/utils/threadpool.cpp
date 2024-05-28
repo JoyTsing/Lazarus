@@ -37,11 +37,12 @@ void deal_task(EventLoop* el, int fd, void* args) {
         break;
       }
       case task_message::TaskType::NEW_TASK: {
-        // TODO 新任务
-
+        // 新任务添加到event_loop中执行
+        el->add_task(std::get<Task>(task.data));
         break;
       }
       default:
+        minilog::log_error("Unknow Task Type");
         break;
     }
   }
@@ -63,7 +64,7 @@ ThreadPool::ThreadPool(int thread_num) : _thread_num(thread_num), _index(0) {
   _queues = std::vector<ThreadQueue<task_message>*>(_thread_num);
   for (int i = 0; i < _thread_num; i++) {
     _queues[i] = new ThreadQueue<task_message>();
-    std::thread t(thread_loop, _queues[i]);
+    std::jthread t(thread_loop, _queues[i]);
     t.detach();
   }
 }
@@ -73,4 +74,14 @@ ThreadQueue<task_message>* ThreadPool::get_thread_queue() {
     _index = 0;
   }
   return _queues[_index++];
+}
+
+void ThreadPool::send_task(task_func func, void* args) {
+  // 给当前thread_pool中的每一个thread里的queue发送task
+  task_message new_task;
+  new_task.type = task_message::TaskType::NEW_TASK;
+  new_task.data = Task(func, args);
+  for (auto queue : _queues) {
+    queue->send(new_task);
+  }
 }

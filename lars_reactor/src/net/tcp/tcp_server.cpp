@@ -178,3 +178,9 @@ void TcpServer::remove_connection(int conn_fd) {
 }
 
 int TcpServer::get_connection_num() { return _conns.size(); }
+
+TCPConnection *TcpServer::get_connection(int conn_fd) {
+  return conn_fd < 0 ? nullptr : _conns[conn_fd];
+}
+
+ThreadPool *TcpServer::get_threadpool() { return _threadpool; }

@@ -29,6 +29,10 @@ class TcpServer {
   static void add_connection(int conn_fd, TCPConnection* conn);
   static void remove_connection(int conn_fd);
   static int get_connection_num();
+  // get connection by fd
+  static TCPConnection* get_connection(int conn_fd);
+  // threadpool
+  ThreadPool* get_threadpool();
 
   /**
    * @brief 用来处理注册过的消息的路由函数

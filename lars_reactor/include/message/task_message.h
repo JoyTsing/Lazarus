@@ -10,9 +10,11 @@
  * @brief thread_queue消息队列能够接受的消息类型
  *
  */
+class EventLoop;
+using task_func = std::function<void(EventLoop* loop, void* args)>;
 
-struct task_func {
-  std::function<void(EventLoop* loop, void* args)> task;
+struct Task {
+  task_func task;
   void* args;
 };
 
@@ -26,5 +28,5 @@ struct task_message {
   // 任务数据：
   // 1.新建立的链接则是fd
   // 2.正常任务则是回调函数和参数
-  std::variant<int, task_func> data;
+  std::variant<int, Task> data;
 };
