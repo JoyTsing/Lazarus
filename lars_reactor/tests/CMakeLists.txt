@@ -8,5 +8,5 @@ foreach(v ${all_tests})
 
   add_executable(${target_name} ${v} ${all_src})
   target_link_libraries(${target_name} PUBLIC doctest nanobench
-    Backward::Backward Backward::Object ${Boost_LIBRARY_DIRS})
+    Backward::Backward Backward::Object)
 endforeach()
