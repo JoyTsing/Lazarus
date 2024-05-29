@@ -3,6 +3,7 @@
 #include <mysql/mysql.h>
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <string_view>
 
@@ -37,14 +38,14 @@ void Router::load_router_map() {
     int cmdid = std::atoi(row[2]);
     unsigned int ip = std::atoi(row[3]);
     int port = std::atoi(row[4]);
-    // minilog::log_info("modid:{}, cmdid:{}, ip:{}, port:{}", modid, cmdid, ip,
-    //                   port);
+    minilog::log_info("modid:{}, cmdid:{}, ip:{}, port:{}", modid, cmdid, ip,
+                      port);
     // 加入到router-map中
     std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
     std::uint64_t value = ((std::uint64_t)ip << 32) + port;
     _router_map[key].insert(value);
   }
-  // update _router_map
+  // TODO update _router_map
 }
 
 void Router::connect_db() {
@@ -74,5 +75,17 @@ void Router::connect_db() {
                        mysql_error(&_db_connection));
     exit(1);
   }
-  minilog::log_info("connect to mysql success");
+  // minilog::log_info("connect to mysql success");
+}
+
+host_set Router::get_hosts(int modid, int cmdid) {
+  host_set hosts;
+  std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
+
+  std::lock_guard<std::mutex> lock(_mutex);
+  router_map_iter iter = _router_map.find(key);
+  if (iter != _router_map.end()) {
+    hosts = iter->second;
+  }
+  return hosts;
 }

@@ -67,7 +67,7 @@ void TCPConnection::handle_read() {
     clear();
     return;
   } else if (ret == 0) {
-    minilog::log_info("connection closed by peer");
+    // minilog::log_info("connection closed by peer");
     clear();
     return;
   }

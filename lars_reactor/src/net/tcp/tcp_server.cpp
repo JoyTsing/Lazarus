@@ -172,7 +172,7 @@ void TcpServer::add_connection(int conn_fd, TCPConnection *conn) {
 void TcpServer::remove_connection(int conn_fd) {
   std::lock_guard<std::mutex> lock(_mutex);
   if (_conns.find(conn_fd) != _conns.end()) {
-    minilog::log_info("remove connection: {}", conn_fd);
+    // minilog::log_info("remove connection: {}", conn_fd);
     _conns.erase(conn_fd);
   }
 }

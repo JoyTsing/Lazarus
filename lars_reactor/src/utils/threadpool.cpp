@@ -33,7 +33,7 @@ void deal_task(EventLoop* el, int fd, void* args) {
           minilog::log_error("new connection error");
           break;
         }
-        minilog::log_info("new connection: [{}]", std::get<int>(task.data));
+        // minilog::log_info("new connection: [{}]", std::get<int>(task.data));
         break;
       }
       case task_message::TaskType::NEW_TASK: {

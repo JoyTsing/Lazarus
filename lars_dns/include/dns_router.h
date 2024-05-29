@@ -3,6 +3,7 @@
 #include <mysql/mysql.h>
 
 #include <cstdint>
+#include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -28,8 +29,11 @@ class Router {
     return instance;
   }
 
+  host_set get_hosts(int modid, int cmdid);
+
   /**
    * @brief load map-router from db
+   *  TODO: 或许可以先加载到redis中，然后再从redis中加载
    *
    */
   void load_router_map();
@@ -46,6 +50,7 @@ class Router {
   void connect_db();
 
  private:
+  std::mutex _mutex;
   MYSQL _db_connection;
   router_map _router_map;  // current router map
   router_map
