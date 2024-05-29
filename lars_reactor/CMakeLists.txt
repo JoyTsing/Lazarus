@@ -12,7 +12,11 @@ project(lars_reactor VERSION 0.10 LANGUAGES CXX)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_subdirectory(third-party/)
+# 指定二进制输出
+set(THIRDPARTY ${CMAKE_BINARY_DIR}/third-party)
+file(MAKE_DIRECTORY ${THIRDPARTY})
+
+add_subdirectory(../third-party/ ${THIRDPARTY})
 add_subdirectory(src/)
 add_subdirectory(examples/)
 add_subdirectory(tests/)
