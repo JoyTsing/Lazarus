@@ -1,7 +1,7 @@
 #include <cstring>
 
+#include "echoMessage.pb.h"
 #include "net/tcp/tcp_server.h"
-#include "pb/echoMessage.pb.h"
 #include "utils/config_file.h"
 
 void qps_test_handle(const char *data, std::uint32_t len, int msgid,
