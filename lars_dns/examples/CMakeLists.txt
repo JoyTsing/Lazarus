@@ -11,7 +11,6 @@ message(STATUS "Using Protobuf ${Protobuf_VERSION}")
 set(PROTO_PATH ${LARS_PATH}/proto)
 set(LARS_PROTO ${PROTO_PATH}/lars.proto)
 set(GENERATED_PROTOBUF_PATH ${CMAKE_BINARY_DIR}/proto)
-file(MAKE_DIRECTORY ${GENERATED_PROTOBUF_PATH})
 
 set(LARS_CPP_FILE ${GENERATED_PROTOBUF_PATH}/lars.pb.cc)
 set(LARS_H_FILE ${GENERATED_PROTOBUF_PATH}/lars.pb.h)
@@ -25,7 +24,7 @@ include_directories(${GENERATED_PROTOBUF_PATH})
 
 configure_file(${PROJECT_SOURCE_DIR}/conf/lars_dns.conf ./conf/lars_dns.conf COPYONLY)
 
-file(GLOB_RECURSE all_src *.cpp)
+file(GLOB_RECURSE all_src ${PROJECT_SOURCE_DIR}/examples/*.cpp)
 add_executable(dns_client ${all_src} ${GENERATED_PROTOBUF_FILES})
 
 # mysql以及上一个模块reactor
