@@ -2,22 +2,14 @@ set(protobuf_MODULE_COMPATIBLE true)
 
 find_package(Protobuf CONFIG REQUIRED)
 
-# TODO:消除absl的报错要靠grpc，无语了
+# 消除absl的报错要靠grpc，无语了
 find_package(gRPC CONFIG REQUIRED)
 link_libraries(gRPC::grpc++)
-message(STATUS "Using Protobuf ${Protobuf_VERSION}")
 
-# 生成pb文件
-set(PROTO_PATH ${LARS_PATH}/proto)
-set(LARS_PROTO ${PROTO_PATH}/lars.proto)
-set(GENERATED_PROTOBUF_PATH ${CMAKE_BINARY_DIR}/proto)
-
-set(LARS_CPP_FILE ${GENERATED_PROTOBUF_PATH}/lars.pb.cc)
-set(LARS_H_FILE ${GENERATED_PROTOBUF_PATH}/lars.pb.h)
-
-set(GENERATED_PROTOBUF_FILES
-  ${LARS_H_FILE}
-  ${LARS_CPP_FILE}
+# 执行需要的依赖
+add_custom_target(
+  EXAMPLE_GEN_PROTO
+  DEPENDS ${GENERATED_PROTOBUF_FILES}
 )
 
 include_directories(${GENERATED_PROTOBUF_PATH})
