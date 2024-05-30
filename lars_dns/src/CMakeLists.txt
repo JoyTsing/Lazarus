@@ -41,4 +41,5 @@ file(GLOB_RECURSE all_src ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(dns_service ${all_src} ${GENERATED_PROTOBUF_FILES})
 
 # mysql以及上一个模块reactor
-target_link_libraries(dns_service PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB} mysqlclient)
+target_link_libraries(dns_service PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB} mysqlclient
+  Backward::Backward Backward::Object)

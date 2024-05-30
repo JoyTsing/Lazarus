@@ -85,13 +85,14 @@ int main(int argc, const char** argv) {
   server = new TcpServer(&loop, ip.c_str(), port);
   // cons/dest hook
   server->set_construct_hook(create_subscribe);
+  server->set_destruct_hook(clear_subscribe);
   // 添加回调
   server->add_message_router(lars::ID_GetRouterRequest, get_router);
 
   // 定期发布更变mod的集合
   std::jthread([]() {
     while (true) {
-      std::this_thread::sleep_for(std::chrono::seconds(3));
+      std::this_thread::sleep_for(std::chrono::seconds(1));
       // modid =1,cmdid=1
       int modid = 1, cmdid = 1;
       std::uint64_t mod = ((std::uint64_t)modid << 32) + cmdid;
