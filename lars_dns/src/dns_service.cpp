@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <memory>
@@ -33,8 +34,8 @@ void get_router(const char* data, std::uint32_t len, int message_id,
   } else if (set->find(mod) == set->end()) {
     SubscribeList::instance()->subscribe(mod, conn->get_fd());
     set->insert(mod);
-    minilog::log_info("fd {} subscribe modid = {}, cmdid= {}", conn->get_fd(),
-                      modid, cmdid);
+    minilog::log_info(" @fd [{}] subscribe: modid = {}, cmdid= {}",
+                      conn->get_fd(), modid, cmdid);
   }
   // 3. parse to host
   host_set hosts = Router::instance()->get_hosts(modid, cmdid);
@@ -69,6 +70,10 @@ void clear_subscribe(NetConnection* conn, void* args) {
   // 释放绑定的mod集合
   client_subscribe_set* set = (client_subscribe_set*)conn->param;
   for (auto mod : *set) {
+    int modid = (int)(mod >> 32);
+    int cmdid = (int)mod;
+    minilog::log_info(" @fd [{}] unsubscribe: modid= {}, cmdid={}",
+                      conn->get_fd(), modid, cmdid);
     SubscribeList::instance()->unsubscribe(mod, conn->get_fd());
   }
   delete set;
@@ -84,15 +89,15 @@ int main(int argc, const char** argv) {
 
   server = new TcpServer(&loop, ip.c_str(), port);
   // cons/dest hook
-  server->set_construct_hook(create_subscribe);
-  server->set_destruct_hook(clear_subscribe);
+  server->set_conn_start_hook(create_subscribe);
+  server->set_conn_close_hook(clear_subscribe);
   // 添加回调
   server->add_message_router(lars::ID_GetRouterRequest, get_router);
 
   // 定期发布更变mod的集合
   std::jthread([]() {
     while (true) {
-      std::this_thread::sleep_for(std::chrono::seconds(1));
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
       // modid =1,cmdid=1
       int modid = 1, cmdid = 1;
       std::uint64_t mod = ((std::uint64_t)modid << 32) + cmdid;

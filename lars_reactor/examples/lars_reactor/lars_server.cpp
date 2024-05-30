@@ -71,8 +71,8 @@ int main(int argc, const char **argv) {
   server->add_message_router(101, print);
   server->add_message_router(200, print);
   // 设置连接hook函数
-  server->set_construct_hook(on_client_build);
-  server->set_destruct_hook(on_client_lost);
+  server->set_conn_start_hook(on_client_build);
+  server->set_conn_close_hook(on_client_lost);
   loop.event_process();
   return 0;
 }

@@ -45,11 +45,12 @@ class TcpServer {
   static void call_router(int msg_id, uint32_t len, const char* data,
                           NetConnection* conn);
 
-  // construct and destruct hook function
-  static void set_construct_hook(connection_callback hook,
-                                 void* args = nullptr);
+  // connection hook
+  static void set_conn_start_hook(connection_callback hook,
+                                  void* args = nullptr);
 
-  static void set_destruct_hook(connection_callback hook, void* args = nullptr);
+  static void set_conn_close_hook(connection_callback hook,
+                                  void* args = nullptr);
 
  private:
   int _sockfd;

@@ -149,12 +149,12 @@ void TcpServer::call_router(int msg_id, uint32_t len, const char *data,
   _router.call_router(msg_id, len, data, conn);
 }
 
-void TcpServer::set_construct_hook(connection_callback hook, void *args) {
+void TcpServer::set_conn_start_hook(connection_callback hook, void *args) {
   _construct_hook = hook;
   _construct_hook_args = args;
 }
 
-void TcpServer::set_destruct_hook(connection_callback hook, void *args) {
+void TcpServer::set_conn_close_hook(connection_callback hook, void *args) {
   _destruct_hook = hook;
   _destruct_hook_args = args;
 }
