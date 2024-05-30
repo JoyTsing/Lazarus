@@ -15,6 +15,7 @@ class UdpClient : public NetConnection {
   // add message router
   void add_message_router(int msg_id, message_callback handler,
                           void* args = nullptr);
+  int get_fd() override { return _sockfd; }
 
  private:
   void handle_read();

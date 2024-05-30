@@ -11,7 +11,7 @@
 void on_connection(NetConnection* conn, void* args) {
   lars::GetRouterRequest request;
   request.set_modid(1);
-  request.set_cmdid(1);
+  request.set_cmdid(2);
   std::string request_str;
 
   // 序列化

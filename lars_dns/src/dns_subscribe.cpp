@@ -8,6 +8,7 @@
 #include "lars.pb.h"
 #include "net/net_connection.h"
 #include "net/tcp/tcp_server.h"
+#include "utils/minilog.h"
 
 // 全局的server
 extern TcpServer* server;
@@ -32,10 +33,15 @@ void SubscribeList::unsubscribe(std::uint64_t key, int fd) {
 void SubscribeList::filter_online_fds(const listen_fd_set& online_fds,
                                       publish_map& need_publish) {
   std::lock_guard<std::mutex> lock(_publish_mutex);
-  for (const auto& [fd, _] : _publish_map) {
+
+  for (auto it = _publish_map.begin(); it != _publish_map.end();) {
+    auto [fd, _] = *it;
     if (online_fds.find(fd) != online_fds.end()) {
       need_publish[fd] = _publish_map[fd];
-      _publish_map.erase(fd);
+      _publish_map.erase(it++);
+    } else {
+      // 调用erase时候出问题了
+      it++;
     }
   }
 }
@@ -77,7 +83,7 @@ void SubscribeList::push_handler(const listen_fd_set& online_fds) {
   }
 }
 
-void SubscribeList::publish(const std::vector<int>& change_mods) {
+void SubscribeList::publish(const std::vector<std::uint64_t>& change_mods) {
   {
     // 临界资源加锁
     std::lock_guard<std::mutex> lock(_subscribe_mutex);

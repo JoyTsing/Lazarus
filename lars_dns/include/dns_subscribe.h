@@ -47,7 +47,7 @@ class SubscribeList {
    *
    * @param change_mods 修改的modid/cmdid，用于过滤出对应的fd
    */
-  void publish(const std::vector<int>& change_mods);
+  void publish(const std::vector<std::uint64_t>& change_mods);
 
  private:
   SubscribeList();

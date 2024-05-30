@@ -34,6 +34,8 @@ class TCPClient : public NetConnection {
     _destruct_hook_args = args;
   }
 
+  int get_fd() override { return _sockfd; }
+
  private:
   void handle_connect();
   void handle_read();

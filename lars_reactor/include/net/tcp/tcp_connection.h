@@ -24,6 +24,8 @@ class TCPConnection : public NetConnection {
   // write event
   void handle_write();
 
+  int get_fd() override { return _conn_fd; }
+
  private:
   void add_read_event(int fd);
   void add_write_event(int fd);
