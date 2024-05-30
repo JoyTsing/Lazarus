@@ -37,7 +37,10 @@ void SubscribeList::filter_online_fds(const listen_fd_set& online_fds,
   for (auto it = _publish_map.begin(); it != _publish_map.end();) {
     auto [fd, _] = *it;
     if (online_fds.find(fd) != online_fds.end()) {
-      need_publish[fd] = _publish_map[fd];
+      // need_publish[fd] = _publish_map[fd]; 最好不要用浅拷贝
+      for (auto mod : _publish_map[fd]) {
+        need_publish[fd].insert(mod);
+      }
       _publish_map.erase(it++);
     } else {
       // 调用erase时候出问题了

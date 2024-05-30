@@ -28,7 +28,7 @@ void handle_router(MESSAGE_ROUTER_ARGS) {
   minilog::log_info("modid = {}, cmd id ={}, host_size= {}", response.modid(),
                     response.cmdid(), response.hosts_size());
   for (int i = 0; i < response.hosts_size(); i++) {
-    minilog::log_info(" ==> ip = {}, port = {}",
+    minilog::log_info(" @mods[{}]==> ip = {}, port = {}", i,
                       (std::uint32_t)response.hosts(i).ip(),
                       response.hosts(i).port());
   }
