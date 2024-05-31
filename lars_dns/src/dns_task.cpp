@@ -5,6 +5,7 @@
 #include "dns_router.h"
 #include "dns_subscribe.h"
 #include "lars.pb.h"
+#include "utils/minilog.h"
 
 // 获取路由信息
 void get_router(const char* data, std::uint32_t len, int message_id,
@@ -61,6 +62,7 @@ void check_router_change(void* args) {
     // 检测版本号是否有变化
     bool change = Router::instance()->check_version();
     if (change) {
+      minilog::log_info("detect the change of router map");
       // 有变化
       last_time = now;
       // 1 将最新的RouteData数据加载到_router_map_bak
@@ -77,6 +79,7 @@ void check_router_change(void* args) {
       if (now - last_time >= duration) {
         last_time = now;
         // 强制更新
+        minilog::log_info("Force updates the router map");
         Router::instance()->load_router_map(true);
         Router::instance()->update_router_map();
       }

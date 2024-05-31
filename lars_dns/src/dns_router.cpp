@@ -3,6 +3,7 @@
 #include <mysql/mysql.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -40,10 +41,12 @@ bool Router::check_version() {
   }
   MYSQL_ROW row = mysql_fetch_row(result.get());
   // parse row
-  int version = std::atoi(row[1]);
-  minilog::log_info("version:{}", version);
+  std::uint64_t version = std::atoll(row[0]);
   // compare version
+  // minilog::log_info("load from db version:{}", (std::uint64_t)version);
   if (version != _version) {
+    minilog::log_info("version update: from old@{} to new@{}", _version,
+                      (std::uint64_t)version);
     _version = version;
     return true;
   }
@@ -106,8 +109,8 @@ void Router::load_router_map(bool is_bak) {
     int cmdid = std::atoi(row[2]);
     unsigned int ip = std::atoi(row[3]);
     int port = std::atoi(row[4]);
-    minilog::log_info("modid:{}, cmdid:{}, ip:{}, port:{}", modid, cmdid, ip,
-                      port);
+    // minilog::log_info("modid:{}, cmdid:{}, ip:{}, port:{}", modid, cmdid, ip,
+    //                   port);
     // 加入到router-map中
     std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
     std::uint64_t value = ((std::uint64_t)ip << 32) + port;
