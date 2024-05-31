@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <format>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -14,9 +15,9 @@
 
 Router::Router() : _version(0) {
   connect_db();
-  minilog::log_info("Router init");
   // init router map from db
   load_router_map(false);
+  minilog::log_info("Router init done");
 }
 
 bool Router::check_version() {
@@ -42,11 +43,9 @@ bool Router::check_version() {
   MYSQL_ROW row = mysql_fetch_row(result.get());
   // parse row
   std::uint64_t version = std::atoll(row[0]);
-  // compare version
-  // minilog::log_info("load from db version:{}", (std::uint64_t)version);
   if (version != _version) {
-    minilog::log_info("version update: from old@{} to new@{}", _version,
-                      (std::uint64_t)version);
+    // minilog::log_info("version update: from old@{} to new@{}", _version,
+    //                   (std::uint64_t)version);
     _version = version;
     return true;
   }
@@ -79,7 +78,7 @@ void Router::load_changes(std::vector<std::uint64_t>& change_list) {
     // parse row
     int modid = std::atoi(row[0]);
     int cmdid = std::atoi(row[1]);
-    minilog::log_info("[change]mods@[{}]: modid:{}, cmdid:{}", i, modid, cmdid);
+    minilog::log_info("[change mods] @{}: modid:{}, cmdid:{}", i, modid, cmdid);
     // 加入到change_list中
     std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
     change_list.push_back(key);
@@ -101,6 +100,9 @@ void Router::load_router_map(bool is_bak) {
                                            mysql_free_result);
   std::uint64_t num_rows = mysql_num_rows(result.get());
   MYSQL_ROW row;
+  // clear _router_map_bak
+  _router_map_bak.clear();
+  // get rows
   for (int i = 0; i < num_rows; i++) {
     row = mysql_fetch_row(result.get());
     // parse row
@@ -124,6 +126,22 @@ void Router::load_router_map(bool is_bak) {
 void Router::update_router_map() {
   std::lock_guard<std::mutex> lock(_mutex);
   std::swap(_router_map, _router_map_bak);
+}
+
+void Router::remove_changes(bool remove_all) {
+  std::string query_sql;
+  if (remove_all) {
+    query_sql = "DELETE FROM RouteChange;";
+  } else {
+    query_sql =
+        std::format("DELETE FROM RouteChange WHERE version <= {}", _version);
+  }
+  if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
+      0) {
+    minilog::log_fatal("mysql_real_query failed: {}",
+                       mysql_error(&_db_connection));
+    exit(1);
+  }
 }
 
 void Router::connect_db() {

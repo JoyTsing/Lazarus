@@ -61,6 +61,8 @@ class Router {
    */
   void update_router_map();
 
+  void remove_changes(bool remove_all);
+
  private:
   Router();
   Router(const Router&) = delete;

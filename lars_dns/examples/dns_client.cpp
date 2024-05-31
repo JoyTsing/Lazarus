@@ -37,7 +37,6 @@ void handle_router(MESSAGE_ROUTER_ARGS) {
                       response.hosts(i).port());
   }
   // }
-  // 打印
 }
 
 int main(int argc, const char** argv) {
