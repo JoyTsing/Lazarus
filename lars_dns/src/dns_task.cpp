@@ -25,8 +25,8 @@ void get_router(const char* data, std::uint32_t len, int message_id,
   } else if (set->find(mod) == set->end()) {
     SubscribeList::instance()->subscribe(mod, conn->get_fd());
     set->insert(mod);
-    minilog::log_info(" @fd [{}] subscribe: modid = {}, cmdid= {}",
-                      conn->get_fd(), modid, cmdid);
+    // minilog::log_info(" @fd [{}] subscribe: modid = {}, cmdid= {}",
+    //                 conn->get_fd(), modid, cmdid);
   }
   // 3. parse to host
   host_set hosts = Router::instance()->get_hosts(modid, cmdid);
@@ -40,8 +40,9 @@ void get_router(const char* data, std::uint32_t len, int message_id,
     host_info.set_port((int)host);
     // add to response
     response.add_hosts()->CopyFrom(host_info);
-    minilog::log_info("   host ip: {}, port: {}", (std::uint32_t)host_info.ip(),
-                      host_info.port());
+    // minilog::log_info("   host ip: {}, port: {}",
+    // (std::uint32_t)host_info.ip(),
+    //                   host_info.port());
   }
   // 5. send
   std::string send_data;

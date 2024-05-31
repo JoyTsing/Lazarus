@@ -78,8 +78,9 @@ void Router::load_changes(std::vector<std::uint64_t>& change_list) {
     // parse row
     int modid = std::atoi(row[0]);
     int cmdid = std::atoi(row[1]);
-    minilog::log_info("[change mods] @{}: modid:{}, cmdid:{}", i, modid, cmdid);
-    // 加入到change_list中
+    // minilog::log_info("[change mods] @{}: modid:{}, cmdid:{}", i, modid,
+    // cmdid);
+    //  加入到change_list中
     std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
     change_list.push_back(key);
   }
