@@ -38,5 +38,12 @@
 #user-settins
 .vscode
 .cache
+.idea
+
+go.mod
+go.sum
+
+larsWeb
 build
+
 # End of https://www.toptal.com/developers/gitignore/api/c++
