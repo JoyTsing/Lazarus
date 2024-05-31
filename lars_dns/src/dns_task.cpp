@@ -62,7 +62,6 @@ void check_router_change(void* args) {
     // 检测版本号是否有变化
     bool change = Router::instance()->check_version();
     if (change) {
-      minilog::log_info("detect the change of router map");
       // 有变化
       last_time = now;
       // 1 将最新的RouteData数据加载到_router_map_bak

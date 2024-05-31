@@ -22,21 +22,21 @@ void on_connection(NetConnection* conn, void* args) {
   conn->send_message(request_str.c_str(), request_str.size(),
                      lars::ID_GetRouterRequest);
 }
-int cnt = 0;
-// 处理dns回复的消息
+// int cnt = 0;用于压力测试
+//  处理dns回复的消息
 void handle_router(MESSAGE_ROUTER_ARGS) {
   lars::GetRouterResponse response;
   response.ParseFromArray(data, len);
-  cnt++;
-  if (cnt % 50 == 0) {
-    minilog::log_info("modid = {}, cmd id ={}, host_size= {}", response.modid(),
-                      response.cmdid(), response.hosts_size());
-    for (int i = 0; i < response.hosts_size(); i++) {
-      minilog::log_info(" @mods[{}]==> ip = {}, port = {}", i,
-                        (std::uint32_t)response.hosts(i).ip(),
-                        response.hosts(i).port());
-    }
+  // cnt++;
+  // if (cnt % 50 == 0) {
+  minilog::log_info("modid = {}, cmd id ={}, host_size= {}", response.modid(),
+                    response.cmdid(), response.hosts_size());
+  for (int i = 0; i < response.hosts_size(); i++) {
+    minilog::log_info(" @mods[{}]==> ip = {}, port = {}", i,
+                      (std::uint32_t)response.hosts(i).ip(),
+                      response.hosts(i).port());
   }
+  // }
   // 打印
 }
 
