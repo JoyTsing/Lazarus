@@ -55,9 +55,8 @@ bool Router::check_version() {
 
 void Router::load_changes(std::vector<std::uint64_t>& change_list) {
   // query from db
-  std::string query_sql =
-      std::format("SELECT modid,cmdid from RouteChange WHERE version>= {}",
-                  std::to_string(_version));
+  std::string query_sql = std::format(
+      "SELECT modid,cmdid from RouteChange WHERE version>= {};", _version);
   if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
       0) {
     minilog::log_fatal("mysql_real_query failed: {}",

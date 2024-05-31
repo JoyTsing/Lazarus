@@ -79,7 +79,7 @@ void check_router_change(void* args) {
       if (now - last_time >= duration) {
         last_time = now;
         // 强制更新
-        minilog::log_info("Force updates the router map");
+        // minilog::log_info("Force updates the router map");
         Router::instance()->load_router_map(true);
         Router::instance()->update_router_map();
       }
