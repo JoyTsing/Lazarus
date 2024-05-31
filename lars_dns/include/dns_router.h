@@ -6,6 +6,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 // 定义用来保存host的IP/host的port的的集合数据类型
 
@@ -35,8 +36,30 @@ class Router {
    * @brief load map-router from db
    *  TODO: 或许可以先加载到redis中，然后再从redis中加载
    *
+   * @param is_bak 是否加载到bak_map中
    */
-  void load_router_map();
+  void load_router_map(bool is_bak);
+
+  /**
+   * @brief load and check version is changed
+   *
+   * @return true : change
+   * @return false : no change
+   */
+  bool check_version();
+
+  /**
+   * @brief load RouteChange table from db
+   *
+   * @param change_list
+   */
+  void load_changes(std::vector<std::uint64_t>& change_list);
+
+  /**
+   * @brief 将_router_map_bak 更新到 _router_map
+   *
+   */
+  void update_router_map();
 
  private:
   Router();
@@ -52,6 +75,9 @@ class Router {
  private:
   std::mutex _mutex;
   MYSQL _db_connection;
+
+  std::uint64_t _version;
+
   router_map _router_map;  // current router map
   router_map
       _router_map_bak;  // backup router map, used for updating router map

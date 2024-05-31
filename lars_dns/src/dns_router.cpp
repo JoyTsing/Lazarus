@@ -3,6 +3,7 @@
 #include <mysql/mysql.h>
 
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <string_view>
@@ -10,17 +11,17 @@
 #include "utils/config_file.h"
 #include "utils/minilog.h"
 
-Router::Router() {
+Router::Router() : _version(0) {
   connect_db();
   minilog::log_info("Router init");
   // init router map from db
-  load_router_map();
+  load_router_map(false);
 }
 
-void Router::load_router_map() {
+bool Router::check_version() {
   // query from db
-  // select * from RouteData;
-  std::string_view query_sql = "select * from RouteData;";
+  // select * from Version;
+  std::string_view query_sql = "SELECT version FROM RouteVersion WHERE id=1;";
   if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
       0) {
     minilog::log_fatal("mysql_real_query failed: {}",
@@ -28,11 +29,78 @@ void Router::load_router_map() {
     exit(1);
   }
   // get result
-  MYSQL_RES* result = mysql_store_result(&_db_connection);
-  std::uint64_t num_rows = mysql_num_rows(result);
+
+  auto result = std::shared_ptr<MYSQL_RES>(mysql_store_result(&_db_connection),
+                                           mysql_free_result);
+  std::uint64_t num_rows = mysql_num_rows(result.get());
+  if (num_rows != 1) {
+    minilog::log_fatal("No version in RouteVersion table :%s",
+                       mysql_error(&_db_connection));
+    exit(1);
+  }
+  MYSQL_ROW row = mysql_fetch_row(result.get());
+  // parse row
+  int version = std::atoi(row[1]);
+  minilog::log_info("version:{}", version);
+  // compare version
+  if (version != _version) {
+    _version = version;
+    return true;
+  }
+  return false;
+}
+
+void Router::load_changes(std::vector<std::uint64_t>& change_list) {
+  // query from db
+  std::string query_sql =
+      std::format("SELECT modid,cmdid from RouteChange WHERE version>= {}",
+                  std::to_string(_version));
+  if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
+      0) {
+    minilog::log_fatal("mysql_real_query failed: {}",
+                       mysql_error(&_db_connection));
+    exit(1);
+  }
+
+  // get result
+  auto result = std::shared_ptr<MYSQL_RES>(mysql_store_result(&_db_connection),
+                                           mysql_free_result);
+  std::uint64_t num_rows = mysql_num_rows(result.get());
+  if (num_rows == 0) {
+    minilog::log_info("No change in RouteChange table");
+    return;
+  }
+  // parse rows
   MYSQL_ROW row;
   for (int i = 0; i < num_rows; i++) {
-    row = mysql_fetch_row(result);
+    row = mysql_fetch_row(result.get());
+    // parse row
+    int modid = std::atoi(row[0]);
+    int cmdid = std::atoi(row[1]);
+    minilog::log_info("modid:{}, cmdid:{}", modid, cmdid);
+    // 加入到change_list中
+    std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
+    change_list.push_back(key);
+  }
+}
+
+void Router::load_router_map(bool is_bak) {
+  // query from db
+  // select * from RouteData;
+  std::string_view query_sql = "SELECT * from RouteData;";
+  if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
+      0) {
+    minilog::log_fatal("mysql_real_query failed: {}",
+                       mysql_error(&_db_connection));
+    exit(1);
+  }
+  // get result
+  auto result = std::shared_ptr<MYSQL_RES>(mysql_store_result(&_db_connection),
+                                           mysql_free_result);
+  std::uint64_t num_rows = mysql_num_rows(result.get());
+  MYSQL_ROW row;
+  for (int i = 0; i < num_rows; i++) {
+    row = mysql_fetch_row(result.get());
     // parse row
     int modid = std::atoi(row[1]);
     int cmdid = std::atoi(row[2]);
@@ -43,9 +111,17 @@ void Router::load_router_map() {
     // 加入到router-map中
     std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
     std::uint64_t value = ((std::uint64_t)ip << 32) + port;
-    _router_map[key].insert(value);
+    if (is_bak) {
+      _router_map_bak[key].insert(value);
+    } else {
+      _router_map[key].insert(value);
+    }
   }
-  // TODO update _router_map
+}
+
+void Router::update_router_map() {
+  std::lock_guard<std::mutex> lock(_mutex);
+  std::swap(_router_map, _router_map_bak);
 }
 
 void Router::connect_db() {
