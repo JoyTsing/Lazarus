@@ -1,25 +1,23 @@
-#include <chrono>
 #include <ctime>
 
 #include "eventloop/event_loop.h"
 #include "lars.pb.h"
 #include "net/net_connection.h"
 #include "net/tcp/tcp_client.h"
-#include "utils/minilog.h"
 
 void report_host_status(NetConnection* conn, void* args) {
   lars::ReportStatusRequest request;
-  request.set_modid(1);
-  request.set_cmdid(1);
+  request.set_modid(2);
+  request.set_cmdid(2);
   request.set_caller(1145141919);
   request.set_timestamp(time(NULL));
   for (int i = 0; i < 3; i++) {
     lars::HostCallResult result;
-    result.set_ip(i + 1);
-    result.set_port(i + 1000);
-    result.set_succ(i * 100);
-    result.set_fail(i * 10);
-    result.set_overload(true);
+    result.set_ip(1145141919 + i * 1000);
+    result.set_port(i * 10 + 1000);
+    result.set_succ(i * 100 + 20);
+    result.set_fail(i * 10 + 1);
+    result.set_overload(false);
 
     request.add_results()->CopyFrom(result);
   }

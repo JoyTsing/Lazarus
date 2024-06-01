@@ -34,7 +34,7 @@ ReporterStore::ReporterStore() {
   }
 }
 
-void ReporterStore::store(lars::ReportStatusRequest& request) {
+void ReporterStore::store(const lars::ReportStatusRequest& request) {
   for (int i = 0; i < request.results_size(); i++) {
     const lars::HostCallResult& result = request.results(i);
     int overload = result.overload() ? 1 : 0;  // 数据库中的overload是char类型
