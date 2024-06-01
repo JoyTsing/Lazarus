@@ -6,12 +6,14 @@
 
 #include <cstring>
 
+#include "utils/minilog.h"
+
 UdpClient::UdpClient(EventLoop* loop, const char* ip, std::uint16_t port)
     : _loop(loop) {
   _sockfd =
       socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_UDP);
   if (_sockfd == -1) {
-    std::cerr << "udp::client socket() error\n";
+    minilog::log_fatal("udp::client socket() error");
     exit(1);
   }
   // init connection address
@@ -24,7 +26,7 @@ UdpClient::UdpClient(EventLoop* loop, const char* ip, std::uint16_t port)
   // connect to server
   if (connect(_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) ==
       -1) {
-    std::cerr << "udp::client connect() error\n";
+    minilog::log_fatal("udp::client connect() error");
     exit(1);
   }
 
@@ -39,7 +41,7 @@ UdpClient::~UdpClient() {
 
 int UdpClient::send_message(const char* data, int len, int message_id) {
   if (len > MESSAGE_LENGTH_LIMIT) {
-    std::cerr << "udp::server send_message() error\n";
+    minilog::log_error("udp::client send_message() error");
     return -1;
   }
   // 1. 封装数据
@@ -52,7 +54,7 @@ int UdpClient::send_message(const char* data, int len, int message_id) {
   int ret =
       sendto(_sockfd, _write_buffer, len + MESSAGE_HEAD_LEN, 0, nullptr, 0);
   if (ret == -1) {
-    std::cerr << "udp::server sendto() error\n";
+    minilog::log_error("udp::client sendto() error");
     return -1;
   }
   return ret;
@@ -74,7 +76,7 @@ void UdpClient::handle_read() {
         // NONBLOCK模式下，数据读取完毕
         break;
       } else {
-        std::cerr << "udp::client recvfrom() error\n";
+        minilog::log_error("udp::client recvfrom() error");
         break;
       }
     }
@@ -84,7 +86,7 @@ void UdpClient::handle_read() {
     memcpy(&head, _read_buffer, MESSAGE_HEAD_LEN);
     if (head.message_len > MESSAGE_LENGTH_LIMIT || head.message_len < 0 ||
         head.message_len + MESSAGE_HEAD_LEN != package_len) {
-      std::cerr << "udp::client message length error\n";
+      minilog::log_error("udp::client message length error");
       continue;
     }
 

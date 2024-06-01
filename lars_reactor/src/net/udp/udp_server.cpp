@@ -10,23 +10,20 @@
 #include <cstring>
 
 #include "message/message.h"
+#include "utils/minilog.h"
 
 UdpServer::UdpServer(EventLoop* loop, const char* ip, std::uint16_t port)
     : _loop(loop) {
   bzero(&_connection_addr, sizeof(_connection_addr));
   _connection_addr_len = sizeof(_connection_addr);
   if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
-    std::cerr << "signal ignore SIGHUP error\n";
-  }
-
-  if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-    std::cerr << "signal ignore SIGPIPE error\n";
+    minilog::log_error("signal ignore error");
   }
 
   _sockfd =
       socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_UDP);
   if (_sockfd == -1) {
-    std::cerr << "udp::server socket() error\n";
+    minilog::log_fatal("udp::server socket() error");
     exit(1);
   }
   // init connection address
@@ -38,7 +35,7 @@ UdpServer::UdpServer(EventLoop* loop, const char* ip, std::uint16_t port)
 
   // bind the port
   if (bind(_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-    std::cerr << "tcp::server bind() error\n";
+    minilog::log_fatal("tcp::server bind() error");
     exit(1);
   }
 
@@ -53,7 +50,7 @@ UdpServer::~UdpServer() {
 
 int UdpServer::send_message(const char* data, int len, int message_id) {
   if (len > MESSAGE_LENGTH_LIMIT) {
-    std::cerr << "udp::server send_message() error\n";
+    minilog::log_error("udp::server send_message() error");
     return -1;
   }
   // 1. 封装数据
@@ -66,7 +63,7 @@ int UdpServer::send_message(const char* data, int len, int message_id) {
   int ret = sendto(_sockfd, _write_buffer, len + MESSAGE_HEAD_LEN, 0,
                    (struct sockaddr*)&_connection_addr, _connection_addr_len);
   if (ret == -1) {
-    std::cerr << "udp::server sendto() error\n";
+    minilog::log_error("udp::server sendto() error");
     return -1;
   }
   return ret;
@@ -89,7 +86,7 @@ void UdpServer::handle_read() {
         // NONBLOCK模式下，数据读取完毕
         break;
       } else {
-        std::cerr << "udp::server recvfrom() error\n";
+        minilog::log_error("udp::server recvfrom() error");
         break;
       }
     }
@@ -99,7 +96,7 @@ void UdpServer::handle_read() {
     memcpy(&head, _read_buffer, MESSAGE_HEAD_LEN);
     if (head.message_len > MESSAGE_LENGTH_LIMIT || head.message_len < 0 ||
         head.message_len + MESSAGE_HEAD_LEN != package_len) {
-      std::cerr << "udp::server message length error\n";
+      minilog::log_error("udp::server message length error");
       continue;
     }
 
