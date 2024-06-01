@@ -27,11 +27,11 @@ add_custom_target(
 
 include_directories(${GENERATED_PROTOBUF_PATH})
 
-configure_file(${PROJECT_SOURCE_DIR}/conf/lars_dns.conf ./conf/lars_dns.conf COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/conf/lars_lb.conf ./conf/lars_lb.conf COPYONLY)
 
-file(GLOB_RECURSE all_src ${PROJECT_SOURCE_DIR}/src/*.cpp)
-add_executable(dns_server ${all_src} ${GENERATED_PROTOBUF_FILES})
+file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
+add_executable(loadbalance_server ${all_src} ${GENERATED_PROTOBUF_FILES})
 
 # mysql以及上一个模块reactor
-target_link_libraries(dns_server PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB} mysqlclient
+target_link_libraries(loadbalance_server PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB} mysqlclient
   Backward::Backward Backward::Object)
