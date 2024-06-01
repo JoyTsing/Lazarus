@@ -16,5 +16,5 @@ $$ | $$ | $$ |$$   ____|$$ |  $$ |
 ```sh
 go mod init larsWeb
 go mod tidy
-go build -o lars_web
+go build -o larsWeb
 ```
