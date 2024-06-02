@@ -81,6 +81,6 @@ message GetHostResponse {
   uint32 seq = 1;
   int32 modid = 2;
   int32 cmdid = 3;
-  int32 recode = 4;
+  int32 retcode = 4;
   HostInfo hosts = 5;
 }

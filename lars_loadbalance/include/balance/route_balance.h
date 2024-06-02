@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include "balance/load_balance.h"
@@ -30,7 +31,19 @@ class RouterBalance {
    */
   int get_host(int modid, int cmdid, lars::GetHostResponse& response);
 
+  /**
+   * @brief Update the router_map from response
+   *
+   * @param modid
+   * @param cmdid
+   * @param response
+   * @return int lars::ReturnCode
+   */
+  int update_host(int modid, int cmdid,
+                  const lars::GetRouterResponse& response);
+
  private:
+  std::mutex _mtx;
   router_map _router_map;  // mod/cmdid和load balance的对应关系
   int _id;                 // router balance的id,和udp server的id对应
 };

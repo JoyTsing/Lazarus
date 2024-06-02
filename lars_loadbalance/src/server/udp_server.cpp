@@ -33,6 +33,7 @@ void loadbalance::start_udp_servers() {
 
 void loadbalance::server::handle_get_host(MESSAGE_ROUTER_ARGS) {
   // 解析消息
+  minilog::log_info("handle_get_host");
   lars::GetHostRequest request;
   request.ParseFromArray(data, len);
   int modid = request.modid();
