@@ -11,17 +11,17 @@
 #include "utils/config_file.h"
 #include "utils/minilog.h"
 
-void start_dns_client() {
+void loadbalance::start_dns_client() {
   std::jthread([]() {
     minilog::log_info("dns client start...");
-    handle_dns_client();
+    loadbalance::dns::handle_dns_client();
   }).detach();
 }
 
-void handle_dns_read(IO_EVENT_ARGUMENT) {
+void loadbalance::dns::handle_dns_read(IO_EVENT_ARGUMENT) {
   std::queue<lars::GetRouterRequest> messages;
   TCPClient *client = (TCPClient *)args;
-  dns_queue->recv(messages);
+  loadbalance::base::dns_queue->recv(messages);
   while (!messages.empty()) {
     lars::GetRouterRequest request = messages.front();
     messages.pop();
@@ -35,7 +35,7 @@ void handle_dns_read(IO_EVENT_ARGUMENT) {
   }
 }
 
-void handle_dns_client() {
+void loadbalance::dns::handle_dns_client() {
   EventLoop loop;
   // parser config
   std::string ip = config_file::instance()->GetString("dns", "ip", "127.0.0.1");
@@ -43,7 +43,7 @@ void handle_dns_client() {
   // client
   TCPClient client(&loop, ip.c_str(), port);
   // 让loop监控queue的数据
-  dns_queue->set_loop(&loop);
-  dns_queue->set_callback(handle_dns_read, &client);
+  loadbalance::base::dns_queue->set_loop(&loop);
+  loadbalance::base::dns_queue->set_callback(handle_dns_read, &client);
   loop.event_process();
 }

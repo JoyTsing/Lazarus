@@ -2,11 +2,13 @@
 
 #include "message/message.h"
 
+namespace loadbalance {
+namespace server {
+void handle_get_host(MESSAGE_ROUTER_ARGS);
+}  // namespace server
 /**
  * @brief 启动UDP服务器
  *
  */
-
 void start_udp_servers();
-
-void handle_get_host(MESSAGE_ROUTER_ARGS);
+}  // namespace loadbalance

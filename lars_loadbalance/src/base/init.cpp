@@ -2,11 +2,15 @@
 
 #include "utils/config_file.h"
 
-std::shared_ptr<ThreadQueue<lars::ReportStatusRequest>> reporter_queue;
-std::shared_ptr<ThreadQueue<lars::GetRouterRequest>> dns_queue;
+std::shared_ptr<ThreadQueue<lars::ReportStatusRequest>>
+    loadbalance::base::reporter_queue;
+std::shared_ptr<ThreadQueue<lars::GetRouterRequest>>
+    loadbalance::base::dns_queue;
 
-void resource_init() {
+void loadbalance::resource_init() {
   config_file::setPath("./conf/lars_lb.conf");
-  reporter_queue = std::make_shared<ThreadQueue<lars::ReportStatusRequest>>();
-  dns_queue = std::make_shared<ThreadQueue<lars::GetRouterRequest>>();
+  loadbalance::base::reporter_queue =
+      std::make_shared<ThreadQueue<lars::ReportStatusRequest>>();
+  loadbalance::base::dns_queue =
+      std::make_shared<ThreadQueue<lars::GetRouterRequest>>();
 }

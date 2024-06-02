@@ -17,6 +17,8 @@ using router_map_it = router_map::iterator;
  */
 class RouterBalance {
  public:
+  RouterBalance();
+
  private:
   router_map _router_map;  // mod/cmdid和load balance的对应关系
   int _id;                 // router balance的id,和udp server的id对应
