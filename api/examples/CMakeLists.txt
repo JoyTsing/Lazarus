@@ -6,10 +6,13 @@ find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 link_libraries(gRPC::grpc++)
 
+# api
+set(LAZARUS_LIB ${CMAKE_BINARY_DIR}/src/liblazarusclient.a)
+
 # 执行需要的依赖
 add_custom_target(
   EXAMPLE_GEN_PROTO
-  DEPENDS ${GENERATED_PROTOBUF_FILES}
+  DEPENDS ${GENERATED_PROTOBUF_FILES} ${LAZARUS_LIB}
 )
 
 include_directories(${GENERATED_PROTOBUF_PATH})
@@ -22,5 +25,5 @@ foreach(v ${all_src})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
   add_executable(${target_name} ${v} ${GENERATED_PROTOBUF_FILES})
-  target_link_libraries(${target_name} PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB} Backward::Backward Backward::Object)
+  target_link_libraries(${target_name} PUBLIC ${LAZARUS_LIB} protobuf::libprotobuf Backward::Backward Backward::Object)
 endforeach()

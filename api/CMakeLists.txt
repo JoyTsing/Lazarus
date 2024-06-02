@@ -12,13 +12,6 @@ project(lars_api VERSION 0.1 LANGUAGES CXX)
 
 get_filename_component(LARS_PATH ${PROJECT_SOURCE_DIR}/../ ABSOLUTE)
 
-# lars_reactor
-set(LARS_REACTOR_INCLUDE ${LARS_PATH}/lars_reactor/include)
-set(LARS_REACTOR_LIB ${LARS_PATH}/lars_reactor/build/src/libreactor.a)
-
-include_directories(${LARS_REACTOR_INCLUDE})
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
 # PROTO
 set(PROTO_PATH ${LARS_PATH}/proto)
 set(LARS_PROTO ${PROTO_PATH}/lars.proto)
@@ -35,6 +28,8 @@ set(GENERATED_PROTOBUF_FILES
 # 指定二进制输出
 set(THIRDPARTY ${CMAKE_BINARY_DIR}/third-party)
 file(MAKE_DIRECTORY ${THIRDPARTY})
+
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory(../third-party/ ${THIRDPARTY})
 add_subdirectory(src/)

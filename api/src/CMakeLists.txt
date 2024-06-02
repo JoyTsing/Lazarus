@@ -25,6 +25,11 @@ add_custom_target(
   DEPENDS ${GENERATED_PROTOBUF_FILES}
 )
 
+# lars_reactor
+set(LARS_REACTOR_INCLUDE ${LARS_PATH}/lars_reactor/include)
+set(LARS_REACTOR_LIB ${LARS_PATH}/lars_reactor/build/src/libreactor.a)
+
+include_directories(${LARS_REACTOR_INCLUDE})
 include_directories(${GENERATED_PROTOBUF_PATH})
 
 file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
