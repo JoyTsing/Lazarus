@@ -12,7 +12,7 @@ enum MessageId {
   ID_GetHostResponse = 5;     // lb agent回复API请求的主机的消息ID
 }
 
-enum LarsRetCode {
+enum ReturnCode {
   RET_SUCC = 0;       // 成功
   RET_OVERLOAD = 1;   // 过载
   RET_SYSTEM_ERR = 2; // 系统错误

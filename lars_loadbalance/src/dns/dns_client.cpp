@@ -21,7 +21,7 @@ void loadbalance::start_dns_client() {
 void loadbalance::dns::handle_dns_read(IO_EVENT_ARGUMENT) {
   std::queue<lars::GetRouterRequest> messages;
   TCPClient *client = (TCPClient *)args;
-  loadbalance::base::dns_queue->recv(messages);
+  base::dns_queue->recv(messages);
   while (!messages.empty()) {
     lars::GetRouterRequest request = messages.front();
     messages.pop();
@@ -43,7 +43,7 @@ void loadbalance::dns::handle_dns_client() {
   // client
   TCPClient client(&loop, ip.c_str(), port);
   // 让loop监控queue的数据
-  loadbalance::base::dns_queue->set_loop(&loop);
-  loadbalance::base::dns_queue->set_callback(handle_dns_read, &client);
+  base::dns_queue->set_loop(&loop);
+  base::dns_queue->set_callback(handle_dns_read, &client);
   loop.event_process();
 }

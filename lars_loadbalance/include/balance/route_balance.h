@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "balance/load_balance.h"
+#include "lars.pb.h"
 
 class LoadBalance;
 
@@ -17,7 +18,17 @@ using router_map_it = router_map::iterator;
  */
 class RouterBalance {
  public:
-  RouterBalance();
+  RouterBalance(int id);
+
+  /**
+   * @brief Get the host object
+   *
+   * @param modid
+   * @param cmdid
+   * @param response
+   * @return int lars::ReturnCode
+   */
+  int get_host(int modid, int cmdid, lars::GetHostResponse& response);
 
  private:
   router_map _router_map;  // mod/cmdid和load balance的对应关系

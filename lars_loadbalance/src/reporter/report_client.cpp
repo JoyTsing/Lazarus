@@ -12,13 +12,13 @@ void loadbalance::start_report_client() {
   // 启动一个线程，不断的从队列中取出数据，发送给reporter-server
   std::jthread([]() {
     minilog::log_info("report client start...");
-    loadbalance::reporter::handle_report();
+    reporter::handle_report();
   }).detach();
 }
 void loadbalance::reporter::handle_reporter_read(IO_EVENT_ARGUMENT) {
   std::queue<lars::ReportStatusRequest> messages;
   TCPClient *client = (TCPClient *)args;
-  loadbalance::base::reporter_queue->recv(messages);
+  base::reporter_queue->recv(messages);
   while (!messages.empty()) {
     lars::ReportStatusRequest request = messages.front();
     messages.pop();
@@ -41,8 +41,7 @@ void loadbalance::reporter::handle_report() {
   // client
   TCPClient client(&loop, ip.c_str(), port);
   // 让loop监控queue的数据
-  loadbalance::base::reporter_queue->set_loop(&loop);
-  loadbalance::base::reporter_queue->set_callback(handle_reporter_read,
-                                                  &client);
+  base::reporter_queue->set_loop(&loop);
+  base::reporter_queue->set_callback(handle_reporter_read, &client);
   loop.event_process();
 }
