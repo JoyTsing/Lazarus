@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "eventloop/event_loop.h"
+#include "lars.pb.h"
 #include "net/udp/udp_server.h"
 #include "utils/minilog.h"
 
@@ -15,7 +16,8 @@ void start_udp_servers() {
       EventLoop loop;
       short port = 8888 + i;
       auto server = std::make_shared<UdpServer>(&loop, "0.0.0.0", port);
-      // TODO register router function
+      // register router function
+      server->add_message_router(lars::ID_GetHostRequest, handle_get_host);
       minilog::log_info("LoadBalance agent server:port [{}] is started...",
                         port);
       loop.event_process();

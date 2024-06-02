@@ -5,9 +5,18 @@ package lars;
 /* Lars系统的消息ID */
 enum MessageId {
   ID_UNKNOW = 0;              // 占位
-  ID_GetRouterRequest = 1;    // 向DNS请求Router对应的关系的消息ID
-  ID_GetRouterResponse = 2;   // DNS回复给Agent结果的消息
-  ID_ReportStatusRequest = 3; // 上报host调用状态信息请求消息ID
+  ID_GetRouterRequest = 1;    // lb agent向DNS请求Router对应的关系的消息ID
+  ID_GetRouterResponse = 2;   // DNS server回复给Agent结果的消息
+  ID_ReportStatusRequest = 3; // lb agent上报主机调用状态信息请求消息ID
+  ID_GetHostRequest = 4;      // API给lb agent请求主机的消息ID
+  ID_GetHostResponse = 5;     // lb agent回复API请求的主机的消息ID
+}
+
+enum LarsRetCode {
+  RET_SUCC = 0;       // 成功
+  RET_OVERLOAD = 1;   // 过载
+  RET_SYSTEM_ERR = 2; // 系统错误
+  RET_NOEXIST = 3;    // 不存在
 }
 
 /* 主机的信息 */
@@ -16,19 +25,28 @@ message HostInfo {
   int32 port = 2;
 }
 
-/* 请求dns路由信息的消息 */
+/**
+ * ID_GetRouterRequest
+ * 请求dns路由信息的消息
+ */
 message GetRouterRequest {
   int32 modid = 1;
   int32 cmdid = 2;
 }
 
-/* DNS回复的消息 */
+/**
+ * ID_GetRouterResponse
+ * DNS回复的消息
+ */
 message GetRouterResponse {
   int32 modid = 1;
   int32 cmdid = 2;
   repeated HostInfo hosts = 3;
 }
 
+/**
+ *ID_ReportStatusRequest
+ */
 // 一个主机的调用结果
 message HostCallResult {
   int32 ip = 1;      // ip
@@ -45,4 +63,24 @@ message ReportStatusRequest {
   int32 caller = 3;
   repeated HostCallResult results = 4;
   uint32 timestamp = 5;
+}
+
+/**
+ * API给lb agent请求获取host的消息
+ */
+message GetHostRequest {
+  uint32 seq = 1;
+  int32 modid = 2;
+  int32 cmdid = 3;
+}
+
+/**
+ * lb agent回复API请求的host的消息
+ */
+message GetHostResponse {
+  uint32 seq = 1;
+  int32 modid = 2;
+  int32 cmdid = 3;
+  int32 recode = 4;
+  HostInfo hosts = 5;
 }
