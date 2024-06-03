@@ -7,6 +7,7 @@
 #include "base/host_info.h"
 #include "base/init.h"
 #include "lars.pb.h"
+#include "utils/minilog.h"
 
 LoadBalance::LoadBalance(std::uint32_t modid, std::uint32_t cmdid)
     : _modid(modid), _cmdid(cmdid), _access_cnt(0) {}
@@ -102,3 +103,11 @@ void LoadBalance::get_host_from_list(lars::GetHostResponse& response,
 }
 
 bool LoadBalance::empty() { return _host_map.empty(); }
+
+void LoadBalance::report(int ip, int port, int retcode) {
+  minilog::log_info("load balance report");
+}
+
+void LoadBalance::commit_report() {
+  minilog::log_info("load balance commit report");
+}

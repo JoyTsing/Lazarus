@@ -42,6 +42,11 @@ class RouterBalance {
   int update_host(int modid, int cmdid,
                   const lars::GetRouterResponse& response);
 
+  /**
+   * @brief report the host call info
+   *
+   * @param request
+   */
   void report(const lars::ReportRequest& request);
 
  private:

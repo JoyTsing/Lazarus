@@ -43,15 +43,36 @@ class LoadBalance {
    */
   void update(const lars::GetRouterResponse& response);
 
-  bool empty();
-
   /**
    * @brief Get the one host object
    *
    * @param response
-   * @return int lars::ReturnCode
+   * @return int //lars::ReturnCode
    */
   int get_one_host(lars::GetHostResponse& response);
+
+  /**
+   * @brief Report the host call info
+   *
+   * @param ip
+   * @param port
+   * @param retcode  // lars::ReturnCode
+   */
+  void report(int ip, int port, int retcode);
+
+  /**
+   * @brief Commit the report to server
+   *
+   */
+  void commit_report();
+
+  /**
+   * @brief Check if the host list is empty
+   *
+   * @return true if empty
+   * @return false if not empty
+   */
+  bool empty();
 
  private:
   /**
