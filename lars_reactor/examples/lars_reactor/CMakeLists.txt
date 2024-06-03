@@ -7,6 +7,6 @@ foreach(v ${all_tests})
   string(REGEX REPLACE "examples/lars_reactor/" "" target_name ${relative_path})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
-  add_executable(${target_name} ${v})
+  add_executable(${target_name} EXCLUDE_FROM_ALL ${v})
   target_link_libraries(${target_name} PUBLIC reactor Backward::Backward Backward::Object)
 endforeach()
