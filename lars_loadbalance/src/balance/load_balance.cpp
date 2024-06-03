@@ -1,5 +1,8 @@
 #include "balance/load_balance.h"
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
 #include <cassert>
 #include <cstdint>
 #include <unordered_set>
@@ -35,7 +38,9 @@ void LoadBalance::update(const lars::GetRouterResponse& response) {
     // 1.2 host info
     remote_set.insert(key);
     if (_host_map.find(key) == _host_map.end()) {
-      _host_map[key] = std::make_shared<HostInfo>(host.ip(), host.port());
+      _host_map[key] = std::make_shared<HostInfo>(
+          host.ip(), host.port(),
+          loadbalance::base::lb_config.init_success_cnt);
       // add to idle list
       _idle_list.push_back(_host_map[key]);
     }
@@ -105,9 +110,83 @@ void LoadBalance::get_host_from_list(lars::GetHostResponse& response,
 bool LoadBalance::empty() { return _host_map.empty(); }
 
 void LoadBalance::report(int ip, int port, int retcode) {
-  minilog::log_info("load balance report");
+  uint64_t key = ((uint64_t)ip << 32) + port;
+  if (_host_map.find(key) == _host_map.end()) {
+    return;
+  }
+  auto hostinfo = _host_map[key];
+  // 1. update count
+  if (retcode == lars::RET_SUCC) {
+    hostinfo->virtual_succ++;
+    hostinfo->real_succ++;
+    hostinfo->continue_succ++;
+    hostinfo->continue_err = 0;
+  } else {
+    hostinfo->virtual_err++;
+    hostinfo->real_err++;
+    hostinfo->continue_err++;
+    hostinfo->continue_succ = 0;
+  }
+  // 2. check overload
+  if (hostinfo->overload == false && retcode != lars::RET_SUCC) {
+    // idle -> overload
+    bool overload = false;
+    double err_rate = (double)hostinfo->virtual_err /
+                      (hostinfo->virtual_succ + hostinfo->virtual_err);
+    // 2.1 check error rate
+    if (err_rate > loadbalance::base::lb_config.error_rate) {
+      // overload
+      overload = true;
+    }
+    // 2.2 check continue error
+    if (overload == false &&
+        hostinfo->continue_err >=
+            (std::uint32_t)loadbalance::base::lb_config.continue_error_num) {
+      // overload
+      overload = true;
+    }
+    // 2.3 update overload status
+    if (overload) {
+      in_addr addr;
+      addr.s_addr = htonl(hostinfo->ip);
+      minilog::log_info(
+          "[modid {}:cmdid {}] host {}:{} overload, vir_success {}, vir_error "
+          "{}",
+          _modid, _cmdid, inet_ntoa(addr), hostinfo->port,
+          hostinfo->virtual_err, hostinfo->virtual_err);
+      hostinfo->set_overload();
+      _idle_list.remove(hostinfo);
+      _overload_list.push_back(hostinfo);
+      return;
+    }
+  } else if (hostinfo->overload == true && retcode == lars::RET_SUCC) {
+    // overload -> idle
+    bool idle = false;
+    double succ_rate = (double)hostinfo->virtual_succ /
+                       (hostinfo->virtual_succ + hostinfo->virtual_err);
+    if (succ_rate > loadbalance::base::lb_config.success_rate) {
+      idle = true;
+    }
+    if (idle == false &&
+        hostinfo->continue_succ >=
+            (std::uint32_t)loadbalance::base::lb_config.continue_success_num) {
+      idle = true;
+    }
+
+    if (idle) {
+      in_addr addr;
+      addr.s_addr = htonl(hostinfo->ip);
+      minilog::log_info(
+          "[modid {}:cmdid {}] host {}:{} idle, vir_success {}, vir_error "
+          "{}",
+          _modid, _cmdid, inet_ntoa(addr), hostinfo->port,
+          hostinfo->virtual_err, hostinfo->virtual_err);
+      hostinfo->set_idle();
+      _overload_list.remove(hostinfo);
+      _idle_list.push_back(hostinfo);
+      return;
+    }
+  }
 }
 
-void LoadBalance::commit_report() {
-  minilog::log_info("load balance commit report");
-}
+void LoadBalance::commit_report() {}

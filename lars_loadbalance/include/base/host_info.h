@@ -8,8 +8,11 @@
  */
 class HostInfo {
  public:
-  HostInfo(std::uint32_t ip, short port);
+  HostInfo(std::uint32_t ip, short port, int init_success);
+  void set_idle();
+  void set_overload();
 
+ public:
   std::uint32_t ip;  // host被代理主机IP
   int port;          // host被代理主机端口
 

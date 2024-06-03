@@ -12,6 +12,17 @@ namespace loadbalance {
 struct LBConfig {
   // 经过若干次获取请求host节点后，试探选择一次overload过载节点
   int probe_num;
+  // 初始化时一个节点的虚拟成功次数，防止启动少量失败就过载
+  int init_success_cnt;
+  int init_error_cnt;
+  // idle节点失败率超过这个值就认为是overload节点
+  float error_rate;
+  // overload节点成功率超过这个值就认为是idle节点
+  float success_rate;
+  // 连续失败次数超过这个值就认为是overload节点
+  int continue_error_num;
+  // 连续成功次数超过这个值就认为是idle节点
+  int continue_success_num;
 };
 namespace base {
 // 所需要的队列
