@@ -3,6 +3,7 @@
 #include <mutex>
 
 #include "balance/load_balance.h"
+#include "lars.pb.h"
 
 RouterBalance::RouterBalance(int id) : _id(id) {}
 
@@ -16,7 +17,14 @@ int RouterBalance::get_host(int modid, int cmdid,
   if (_router_map.find(key) != _router_map.end()) {
     auto lb = _router_map[key];
     // 3.1 根据load balance获取host
-    // TODO
+    if (lb->empty()) {
+      // 没有host信息,说明可能正在拉取host信息
+      response.set_retcode(lars::RET_NOEXIST);
+    } else {
+      // 获取host
+      ret = lb->get_one_host(response);
+      response.set_retcode(ret);
+    }
   } else {
     // 3.1 没有找到对应的load balance
     auto lb = std::make_shared<LoadBalance>(modid, cmdid);

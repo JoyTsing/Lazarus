@@ -43,6 +43,25 @@ class LoadBalance {
    */
   void update(const lars::GetRouterResponse& response);
 
+  bool empty();
+
+  /**
+   * @brief Get the one host object
+   *
+   * @param response
+   * @return int lars::ReturnCode
+   */
+  int get_one_host(lars::GetHostResponse& response);
+
+ private:
+  /**
+   * @brief Get the host from list object
+   *
+   * @param response
+   * @param list
+   */
+  void get_host_from_list(lars::GetHostResponse& response, host_list& list);
+
  private:
   // belong to which module
   int _modid;
@@ -53,4 +72,6 @@ class LoadBalance {
   host_list _idle_list;
   // overload
   host_list _overload_list;
+  // modid/cmdid request times
+  int _access_cnt;
 };

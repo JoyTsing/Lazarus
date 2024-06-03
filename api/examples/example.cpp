@@ -27,6 +27,8 @@ int main(int argc, const char** argv) {
     minilog::log_info("host is {}, port is {}", ip, port);
     // do something
     // report
+  } else if (ret == lars::RET_NOEXIST) {
+    minilog::log_info("no exist");
   }
   return 0;
 }
