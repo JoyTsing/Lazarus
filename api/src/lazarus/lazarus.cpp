@@ -70,11 +70,13 @@ int LazarusClient::get_hosts(int modid, int cmdid, std::string& ip,
     return lars::RET_SYSTEM_ERR;
   }
   // 3. block and wait for the response
-  // TODO  maybe need to set the timeout or have better solution
+  int message_len;
   lars::GetHostResponse response;
+  // TODO  maybe need to set the timeout or have better solution
   do {
-    if (recvfrom(_sockfd[index], read_buf, sizeof(read_buf), 0, nullptr, 0) ==
-        -1) {
+    message_len =
+        recvfrom(_sockfd[index], read_buf, sizeof(read_buf), 0, nullptr, 0);
+    if (message_len == -1) {
       minilog::log_error("recvfrom error");
       return lars::RET_SYSTEM_ERR;
     }
@@ -87,7 +89,7 @@ int LazarusClient::get_hosts(int modid, int cmdid, std::string& ip,
     }
     // 4.2 message body
     if (!response.ParseFromArray(read_buf + MESSAGE_HEAD_LEN,
-                                 head.message_len - MESSAGE_HEAD_LEN)) {
+                                 message_len - MESSAGE_HEAD_LEN)) {
       minilog::log_error("parse message body error");
       return lars::RET_SYSTEM_ERR;
     }
