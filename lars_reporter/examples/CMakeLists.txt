@@ -9,7 +9,7 @@ link_libraries(gRPC::grpc++)
 # 执行需要的依赖
 add_custom_target(
   EXAMPLE_DEPENDS
-  DEPENDS ${GENERATED_PROTOBUF_FILES} ${CMAKE_BINARY_DIR}/src/reporter_server
+  DEPENDS ${GENERATED_PROTOBUF_FILES}
 )
 
 include_directories(${GENERATED_PROTOBUF_PATH})
@@ -23,6 +23,7 @@ foreach(v ${all_examples})
   string(REGEX REPLACE "examples/" "" target_name ${relative_path})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
-  add_executable(${target_name} EXCLUDE_FROM_ALL ${v} ${GENERATED_PROTOBUF_FILES})
+  add_executable(${target_name} ${v} ${GENERATED_PROTOBUF_FILES})
+  add_dependencies(${target_name} EXAMPLE_DEPENDS)
   target_link_libraries(${target_name} PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB})
 endforeach()

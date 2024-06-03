@@ -21,7 +21,7 @@ add_custom_command(
 
 # 执行需要的依赖
 add_custom_target(
-  SRC_GEN_PROTO
+  GEN_PROTO
   DEPENDS ${GENERATED_PROTOBUF_FILES}
 )
 
@@ -31,6 +31,7 @@ configure_file(${PROJECT_SOURCE_DIR}/conf/lars_reporter.conf ./conf/lars_reporte
 
 file(GLOB_RECURSE all_src *.cpp)
 add_executable(reporter_server ${all_src} ${GENERATED_PROTOBUF_FILES})
+add_dependencies(reporter_server GEN_PROTO)
 
 # mysql以及上一个模块reactor
 target_link_libraries(reporter_server PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB} mysqlclient

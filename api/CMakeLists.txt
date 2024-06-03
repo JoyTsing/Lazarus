@@ -26,6 +26,18 @@ set(GENERATED_PROTOBUF_FILES
   ${LARS_CPP_FILE}
 )
 
+# PROTO LIB
+set(protobuf_MODULE_COMPATIBLE true)
+
+find_package(Protobuf CONFIG REQUIRED)
+
+# 消除absl的报错要靠grpc，无语了
+find_package(gRPC CONFIG REQUIRED)
+link_libraries(gRPC::grpc++)
+message(STATUS "Using Protobuf ${Protobuf_VERSION}")
+
+include_directories(${GENERATED_PROTOBUF_PATH})
+
 # lars_reactor
 set(LARS_REACTOR_INCLUDE ${LARS_PATH}/lars_reactor/include)
 set(LARS_REACTOR_LIB ${LARS_PATH}/lars_reactor/build/src/libreactor.a)

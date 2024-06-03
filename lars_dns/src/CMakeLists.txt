@@ -21,7 +21,7 @@ add_custom_command(
 
 # 执行需要的依赖
 add_custom_target(
-  SRC_GEN_PROTO
+  PROTO_DEP
   DEPENDS ${GENERATED_PROTOBUF_FILES}
 )
 
@@ -31,6 +31,7 @@ configure_file(${PROJECT_SOURCE_DIR}/conf/lars_dns.conf ./conf/lars_dns.conf COP
 
 file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(dns_server ${all_src} ${GENERATED_PROTOBUF_FILES})
+add_dependencies(dns_server PROTO_DEP)
 
 # mysql以及上一个模块reactor
 target_link_libraries(dns_server PUBLIC protobuf::libprotobuf ${LARS_REACTOR_LIB} mysqlclient

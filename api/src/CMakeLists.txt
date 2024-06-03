@@ -1,12 +1,6 @@
-set(protobuf_MODULE_COMPATIBLE true)
+include_directories(${LARS_REACTOR_INCLUDE})
 
-find_package(Protobuf CONFIG REQUIRED)
-
-# 消除absl的报错要靠grpc，无语了
-find_package(gRPC CONFIG REQUIRED)
-link_libraries(gRPC::grpc++)
-message(STATUS "Using Protobuf ${Protobuf_VERSION}")
-
+# PROTO
 add_custom_command(
   OUTPUT
   ${LARS_H_FILE}
@@ -16,20 +10,18 @@ add_custom_command(
   --proto_path=${PROTO_PATH}
   --cpp_out=${GENERATED_PROTOBUF_PATH}
   ${LARS_PROTO}
-  COMMENT "Running C++ protocol buffer compiler"
+  COMMENT "Running C++ Protobuf compiler..."
 )
 
-# 执行需要的依赖
+# taget
 add_custom_target(
-  SRC_GEN_PROTO
+  PROTO_DEP
   DEPENDS ${GENERATED_PROTOBUF_FILES}
 )
 
-include_directories(${LARS_REACTOR_INCLUDE})
-include_directories(${GENERATED_PROTOBUF_PATH})
-
 file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_library(lazarusclient STATIC ${all_src})
+add_dependencies(lazarusclient PROTO_DEP)
 
 # mysql以及上一个模块reactor
 target_link_libraries(lazarusclient PUBLIC protobuf::libprotobuf dl ${LARS_REACTOR_LIB} Backward::Backward Backward::Object)
