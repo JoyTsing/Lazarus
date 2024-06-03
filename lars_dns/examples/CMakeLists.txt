@@ -8,8 +8,8 @@ link_libraries(gRPC::grpc++)
 
 # 执行需要的依赖
 add_custom_target(
-  EXAMPLE_GEN_PROTO
-  DEPENDS ${GENERATED_PROTOBUF_FILES}
+  EXAMPLE_DEPENDS
+  DEPENDS ${GENERATED_PROTOBUF_FILES} ${CMAKE_BINARY_DIR}/src/dns_server
 )
 
 include_directories(${GENERATED_PROTOBUF_PATH})

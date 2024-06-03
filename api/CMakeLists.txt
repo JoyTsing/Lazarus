@@ -25,6 +25,10 @@ set(GENERATED_PROTOBUF_FILES
   ${LARS_CPP_FILE}
 )
 
+# lars_reactor
+set(LARS_REACTOR_INCLUDE ${LARS_PATH}/lars_reactor/include)
+set(LARS_REACTOR_LIB ${LARS_PATH}/lars_reactor/build/src/libreactor.a)
+
 # 指定二进制输出
 set(THIRDPARTY ${CMAKE_BINARY_DIR}/third-party)
 file(MAKE_DIRECTORY ${THIRDPARTY})

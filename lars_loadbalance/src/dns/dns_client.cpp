@@ -3,13 +3,13 @@
 #include <queue>
 #include <thread>
 
-#include "base/hash.h"
 #include "base/init.h"
 #include "eventloop/event_base.h"
 #include "eventloop/event_loop.h"
 #include "lars.pb.h"
 #include "net/tcp/tcp_client.h"
 #include "utils/config_file.h"
+#include "utils/hash.h"
 #include "utils/minilog.h"
 
 void loadbalance::start_dns_client() {

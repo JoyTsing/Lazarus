@@ -16,6 +16,7 @@ add_custom_target(
 )
 
 include_directories(${GENERATED_PROTOBUF_PATH})
+include_directories(${LARS_REACTOR_INCLUDE})
 
 file(GLOB_RECURSE all_src ${PROJECT_SOURCE_DIR}/examples/*.cpp)
 
