@@ -104,7 +104,7 @@ int LazarusClient::get_hosts(int modid, int cmdid, std::string& ip,
   if (response.retcode() == lars::RET_SUCC) {
     lars::HostInfo host = response.hosts();
     in_addr addr;
-    addr.s_addr = host.ip();
+    addr.s_addr = ntohl(host.ip());
     ip = inet_ntoa(addr);
     port = host.port();
   }
