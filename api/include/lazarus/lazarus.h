@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace lazarus {
@@ -21,6 +22,17 @@ class LazarusClient {
    * @return int lars::ReturnCode
    */
   int get_hosts(int modid, int cmdid, std::string& ip, short& port);
+
+  /**
+   * @brief report the calls status
+   *
+   * @param modid
+   * @param cmdid
+   * @param ip
+   * @param retcode : lars::ReturnCode
+   */
+  void report(int modid, int cmdid, std::string_view ip, short port,
+              int retcode);
 
  private:
   std::uint32_t _seqid;      // sequence id

@@ -59,3 +59,5 @@ int RouterBalance::update_host(int modid, int cmdid,
   // 3. 更新load balance的host信息
   return ret;
 }
+
+void RouterBalance::report(const lars::ReportRequest& request) {}

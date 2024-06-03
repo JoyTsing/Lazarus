@@ -10,6 +10,7 @@ enum MessageId {
   ID_ReportStatusRequest = 3; // lb agent上报主机调用状态信息请求消息ID
   ID_GetHostRequest = 4;      // API给lb agent请求主机的消息ID
   ID_GetHostResponse = 5;     // lb agent回复API请求的主机的消息ID
+  ID_ReportRequest = 6;       // API给lb agent的report请求
 }
 
 enum ReturnCode {
@@ -83,4 +84,14 @@ message GetHostResponse {
   int32 cmdid = 3;
   int32 retcode = 4;
   HostInfo hosts = 5;
+}
+
+/**
+ * API给lb agent report的数据
+ */
+message ReportRequest {
+  int32 modid = 1;
+  int32 cmdid = 2;
+  HostInfo host = 3;
+  int32 retcode = 4;
 }

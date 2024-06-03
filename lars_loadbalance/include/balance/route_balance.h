@@ -42,6 +42,8 @@ class RouterBalance {
   int update_host(int modid, int cmdid,
                   const lars::GetRouterResponse& response);
 
+  void report(const lars::ReportRequest& request);
+
  private:
   std::mutex _mtx;
   router_map _router_map;  // mod/cmdid和load balance的对应关系

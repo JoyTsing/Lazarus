@@ -112,4 +112,34 @@ int LazarusClient::get_hosts(int modid, int cmdid, std::string& ip,
   return response.retcode();
 }
 
+void LazarusClient::report(int modid, int cmdid, std::string_view ip,
+                           short port, int retcode) {
+  // 1. serialize the request
+  lars::ReportRequest request;
+  request.set_modid(modid);
+  request.set_cmdid(cmdid);
+  request.set_retcode(retcode);
+
+  auto host = request.mutable_host();
+  in_addr addr;
+  inet_aton(ip.data(), &addr);
+  int ip_int = addr.s_addr;
+  host->set_ip(ip_int);
+  host->set_port(port);
+  // 2. send the request
+  char write_buf[4096];
+  message_head head;
+  head.message_len = request.ByteSizeLong();
+  head.message_id = lars::ID_ReportRequest;
+  memcpy(write_buf, &head, MESSAGE_HEAD_LEN);
+  // 2.2 message body
+  request.SerializeToArray(write_buf + MESSAGE_HEAD_LEN, head.message_len);
+  // 3. send the request
+  int index = hash_index(modid, cmdid);
+  if (sendto(_sockfd[index], write_buf, head.message_len + MESSAGE_HEAD_LEN, 0,
+             nullptr, 0) == -1) {
+    minilog::log_error("sendto error");
+  }
+}
+
 }  // namespace lazarus

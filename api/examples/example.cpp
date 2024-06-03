@@ -27,6 +27,7 @@ int main(int argc, const char** argv) {
   if (ret == lars::RET_SUCC) {
     minilog::log_info("host is {}, port is {}", ip, port);
     // do something
+    client->report(modid, cmdid, ip, port, lars::RET_SUCC);
     // report
   } else if (ret == lars::RET_NOEXIST) {
     minilog::log_info("no exist");
