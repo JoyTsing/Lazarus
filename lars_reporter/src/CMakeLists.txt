@@ -29,7 +29,7 @@ include_directories(${GENERATED_PROTOBUF_PATH})
 
 configure_file(${PROJECT_SOURCE_DIR}/conf/lars_reporter.conf ./conf/lars_reporter.conf COPYONLY)
 
-file(GLOB_RECURSE all_src ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE all_src *.cpp)
 add_executable(reporter_server ${all_src} ${GENERATED_PROTOBUF_FILES})
 
 # mysql以及上一个模块reactor

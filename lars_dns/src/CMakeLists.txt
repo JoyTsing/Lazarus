@@ -29,7 +29,7 @@ include_directories(${GENERATED_PROTOBUF_PATH})
 
 configure_file(${PROJECT_SOURCE_DIR}/conf/lars_dns.conf ./conf/lars_dns.conf COPYONLY)
 
-file(GLOB_RECURSE all_src ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE all_src CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(dns_server ${all_src} ${GENERATED_PROTOBUF_FILES})
 
 # mysql以及上一个模块reactor

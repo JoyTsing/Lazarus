@@ -16,9 +16,9 @@ include_directories(${GENERATED_PROTOBUF_PATH})
 
 configure_file(${PROJECT_SOURCE_DIR}/conf/lars_dns.conf ./conf/lars_dns.conf COPYONLY)
 
-file(GLOB_RECURSE all_src ${PROJECT_SOURCE_DIR}/examples/*.cpp)
+file(GLOB_RECURSE all_examples *.cpp)
 
-foreach(v ${all_src})
+foreach(v ${all_examples})
   string(REGEX MATCH "examples/.*" relative_path ${v})
   string(REGEX REPLACE "examples/" "" target_name ${relative_path})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
