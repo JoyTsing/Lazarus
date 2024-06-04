@@ -4,6 +4,7 @@
 #include "eventloop/event_loop.h"
 #include "lars.pb.h"
 #include "net/tcp/tcp_server.h"
+#include "reporter_logo.h"
 #include "reporter_task.h"
 #include "utils/config_file.h"
 #include "utils/minilog.h"
@@ -11,6 +12,7 @@
 std::unique_ptr<TcpServer> server;
 
 int main(int argc, const char** argv) {
+  reporter_logo();
   EventLoop loop;
   config_file::setPath("./conf/lars_reporter.conf");
   std::string ip =

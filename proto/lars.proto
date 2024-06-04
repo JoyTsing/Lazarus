@@ -24,7 +24,7 @@ enum ReturnCode {
 
 /* 主机的信息 */
 message HostInfo {
-  int32 ip = 1;
+  uint32 ip = 1;
   int32 port = 2;
 }
 
@@ -52,7 +52,7 @@ message GetRouterResponse {
  */
 // 一个主机的调用结果
 message HostCallResult {
-  int32 ip = 1;      // ip
+  uint32 ip = 1;     // ip
   int32 port = 2;    // port
   uint32 succ = 3;   // 调度成功次数
   uint32 fail = 4;   // 调度失败次数

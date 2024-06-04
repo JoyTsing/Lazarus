@@ -2,6 +2,7 @@
 #include <memory>
 #include <thread>
 
+#include "dns_logo.h"
 #include "dns_subscribe.h"
 #include "dns_task.h"
 #include "eventloop/event_loop.h"
@@ -35,6 +36,7 @@ void clear_subscribe(NetConnection* conn, void* args) {
 }
 
 int main(int argc, const char** argv) {
+  dns_logo();
   EventLoop loop;
   config_file::setPath("./conf/lars_dns.conf");
   std::string ip =

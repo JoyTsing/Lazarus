@@ -50,6 +50,7 @@ void ReporterStore::store(const lars::ReportStatusRequest& request) {
     if (mysql_real_query(&_conn, sql.data(), sql.size()) != 0) {
       minilog::log_error("Fail to Insert into ServerCallStatus {}",
                          mysql_error(&_conn));
+      std::cout << sql << std::endl;
     }
   }
 }
