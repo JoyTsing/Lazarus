@@ -7,7 +7,6 @@
 #include "balance/load_balance.h"
 #include "base/init.h"
 #include "lars.pb.h"
-#include "utils/minilog.h"
 
 RouterBalance::RouterBalance(int id) : _id(id) {}
 
@@ -52,7 +51,33 @@ int RouterBalance::get_host(int modid, int cmdid,
 int RouterBalance::get_router(int modid, int cmdid,
                               lars::GetRouterResponse& response) {
   int ret = lars::RET_SUCC;
-  minilog::log_info("get router");
+  // 1. 根据modid和cmdid计算hash值
+  std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
+  // 2. 根据hash值找到对应的load balance
+  std::lock_guard<std::mutex> lock(_mtx);
+  if (_router_map.find(key) != _router_map.end()) {
+    auto lb = _router_map[key];
+    // 3.1 根据load balance获取host
+
+    // 获取host
+    lb->get_hosts(response);
+    // res
+    //  触发超时拉取
+    if (lb->status == LoadBalance::Status::NEW &&
+        time(nullptr) - lb->get_update_time() >
+            loadbalance::base::lb_config.route_update_time) {
+      lb->pull();
+    }
+
+  } else {
+    // 3.1 没有找到对应的load balance
+    auto lb = std::make_shared<LoadBalance>(modid, cmdid);
+    _router_map[key] = lb;
+    // 3.2 前往dns_server 拉取对应模块的所有host集合
+    lb->pull();
+    // 3.3设置返回值
+    ret = lars::RET_NOEXIST;
+  }
   return ret;
 }
 

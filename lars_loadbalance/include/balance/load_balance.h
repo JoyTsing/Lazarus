@@ -52,6 +52,12 @@ class LoadBalance {
   int get_one_host(lars::GetHostResponse& response);
 
   /**
+   * @brief Get the hosts object
+   *
+   */
+  void get_hosts(lars::GetRouterResponse& response);
+
+  /**
    * @brief Report the host call info
    *
    * @param ip

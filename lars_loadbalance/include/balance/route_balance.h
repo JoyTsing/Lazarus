@@ -22,7 +22,7 @@ class RouterBalance {
   RouterBalance(int id);
 
   /**
-   * @brief Get the host object
+   * @brief 获取一个host主机，将返回的主机结果存放在rsp中
    *
    * @param modid
    * @param cmdid
@@ -32,7 +32,7 @@ class RouterBalance {
   int get_host(int modid, int cmdid, lars::GetHostResponse& response);
 
   /**
-   * @brief Get the router object
+   * @brief 获取某个modid/cmdid的全部主机，将返回的主机结果存放在rsp中
    *
    * @param modid
    * @param cmdid

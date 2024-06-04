@@ -30,7 +30,6 @@ void LoadBalance::pull() {
   // 2. dns response
   loadbalance::base::dns_queue->send(request);
   status = Status::PULLING;
-  minilog::log_info("pulling");
 }
 
 void LoadBalance::update(const lars::GetRouterResponse& response) {
@@ -76,6 +75,15 @@ void LoadBalance::update(const lars::GetRouterResponse& response) {
   // 更新最后的update时间并且重置状态
   _update_time = time(nullptr);
   status = Status::NEW;
+}
+
+void LoadBalance::get_hosts(lars::GetRouterResponse& response) {
+  for (auto [_, hostinfo] : _host_map) {
+    lars::HostInfo host;
+    host.set_ip(hostinfo->ip);
+    host.set_port(hostinfo->port);
+    response.add_hosts()->CopyFrom(host);
+  }
 }
 
 int LoadBalance::get_one_host(lars::GetHostResponse& response) {
