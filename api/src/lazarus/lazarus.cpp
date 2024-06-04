@@ -5,7 +5,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <chrono>
 #include <cstring>
+#include <thread>
 
 #include "arpa/inet.h"
 #include "lars.pb.h"
@@ -197,6 +199,24 @@ void LazarusClient::report(int modid, int cmdid, std::string_view ip,
              nullptr, 0) == -1) {
     minilog::log_error("sendto error");
   }
+}
+
+int LazarusClient::subscribe(int modid, int cmdid) {
+  router_set router;
+  int retry_cnt = 0;
+  while (router.empty() && retry_cnt < 3) {
+    get_routers(modid, cmdid, router);
+    if (router.empty()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    } else {
+      break;
+    }
+    retry_cnt++;
+  }
+  if (router.empty()) {
+    return lars::RET_NOEXIST;
+  }
+  return lars::RET_SUCC;
 }
 
 }  // namespace lazarus

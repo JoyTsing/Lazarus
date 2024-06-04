@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 namespace lazarus {
@@ -14,7 +15,7 @@ class LazarusClient {
   ~LazarusClient();
 
   /**
-   * @brief Get the host object
+   * @brief Get the host object, should use subscribe first.
    *
    * @param modid
    * @param cmdid
@@ -32,10 +33,19 @@ class LazarusClient {
    * @param modid
    * @param cmdid
    * @param ip
-   * @param retcode : lars::ReturnCode
+   * @param retcode lars::ReturnCode
    */
   void report(int modid, int cmdid, std::string_view ip, short port,
               int retcode);
+
+  /**
+   * @brief Subscribe to the corresponding channel
+   *
+   * @param modid
+   * @param cmdid
+   * @return int lars::ReturnCode
+   */
+  int subscribe(int modid, int cmdid);
 
  private:
   std::uint32_t _seqid;      // sequence id

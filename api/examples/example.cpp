@@ -22,22 +22,28 @@ int main(int argc, const char** argv) {
   short port;
 
   int modid = atoi(argv[1]), cmdid = atoi(argv[2]), overload = atoi(argv[3]);
-
-  // int ret = client->get_host(modid, cmdid, ip, port);
-  // if (ret == lars::RET_SUCC) {
-  //   minilog::log_info("host is {}, port is {}", ip, port);
-  //   // do something
-  //   client->report(modid, cmdid, ip, port, overload);
-  //   // report
-  // } else if (ret == lars::RET_NOEXIST) {
-  //   minilog::log_info("no exist");
-  // }
+  int ret = client->subscribe(modid, cmdid);
+  if (ret != lars::RET_SUCC) {
+    minilog::log_error("subscribe error");
+    return -1;
+  }
+  ret = client->get_host(modid, cmdid, ip, port);
+  if (ret == lars::RET_SUCC) {
+    minilog::log_info("get host is {}, port is {}", ip, port);
+    // do something
+    client->report(modid, cmdid, ip, port, overload);
+    // report
+  } else if (ret == lars::RET_NOEXIST) {
+    minilog::log_info("no exist");
+  }
 
   lazarus::router_set routers;
-  int ret = client->get_routers(modid, cmdid, routers);
+  ret = client->get_routers(modid, cmdid, routers);
   if (ret == lars::RET_SUCC) {
+    minilog::log_info("get routers:");
     for (auto& router : routers) {
-      minilog::log_info("host is {}, port is {}", router.first, router.second);
+      minilog::log_info(" @host is {}, port is {}", router.first,
+                        router.second);
     }
   } else {
     minilog::log_error("get routers error");

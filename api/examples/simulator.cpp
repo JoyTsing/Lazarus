@@ -39,7 +39,7 @@ int main(int argc, const char** argv) {
   auto client = std::make_shared<LazarusClient>();
   std::string ip;
   short port;
-  minilog::log_info("err_rate = {}, query_cnt = {}", err_rate, query_cnt);
+  client->subscribe(modid, cmdid);
   // key ->ip ;value -> <suc_cnt,err_cnt>
   std::unordered_map<std::string, std::pair<std::uint32_t, std::uint32_t>> mp;
   for (int i = 0; i < query_cnt; i++) {
