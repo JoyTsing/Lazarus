@@ -7,6 +7,7 @@
 #include "balance/load_balance.h"
 #include "base/init.h"
 #include "lars.pb.h"
+#include "utils/minilog.h"
 
 RouterBalance::RouterBalance(int id) : _id(id) {}
 
@@ -45,6 +46,13 @@ int RouterBalance::get_host(int modid, int cmdid,
     response.set_retcode(lars::RET_NOEXIST);
     ret = lars::RET_NOEXIST;
   }
+  return ret;
+}
+
+int RouterBalance::get_router(int modid, int cmdid,
+                              lars::GetRouterResponse& response) {
+  int ret = lars::RET_SUCC;
+  minilog::log_info("get router");
   return ret;
 }
 

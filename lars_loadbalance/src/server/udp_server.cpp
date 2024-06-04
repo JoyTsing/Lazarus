@@ -24,6 +24,8 @@ void loadbalance::start_udp_servers() {
                                      server::handle_get_host, &i);
           server->add_message_router(lars::ID_ReportRequest,
                                      server::handle_get_report, &i);
+          server->add_message_router(lars::ID_API_GetRouterRequest,
+                                     server::handle_get_router, &i);
           minilog::log_info("LoadBalance agent server:port [{}] is started...",
                             port);
           loop.event_process();
@@ -31,7 +33,6 @@ void loadbalance::start_udp_servers() {
         i)
         .detach();
   }
-  // TODO 加载本地IP
 }
 
 void loadbalance::server::handle_get_host(MESSAGE_ROUTER_ARGS) {
@@ -62,4 +63,25 @@ void loadbalance::server::handle_get_report(MESSAGE_ROUTER_ARGS) {
   int index = *static_cast<int*>(user_data);
   auto router = base::route_balances[index];
   router->report(request);
+}
+
+void loadbalance::server::handle_get_router(MESSAGE_ROUTER_ARGS) {
+  // 解析消息
+  lars::GetRouterRequest request;
+  request.ParseFromArray(data, len);
+  int modid = request.modid();
+  int cmdid = request.cmdid();
+  // reply
+  lars::GetRouterResponse response;
+  response.set_modid(modid);
+  response.set_cmdid(cmdid);
+  // 通过route_balance 获取host 并填充到response
+  int index = *static_cast<int*>(user_data);
+  auto router = base::route_balances[index];
+  router->get_router(modid, cmdid, response);
+  // 将response发回给客户端
+  std::string response_str;
+  response.SerializeToString(&response_str);
+  client->send_message(response_str.c_str(), response_str.size(),
+                       lars::ID_API_GetRouterResponse);
 }

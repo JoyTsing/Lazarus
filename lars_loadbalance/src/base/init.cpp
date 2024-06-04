@@ -1,5 +1,8 @@
 #include "base/init.h"
 
+#include <arpa/inet.h>
+#include <netdb.h>
+
 #include <memory>
 #include <vector>
 
@@ -44,5 +47,22 @@ void loadbalance::resource_init() {
   for (int id = 1; id <= 3; id++) {
     route_balances.push_back(std::make_shared<RouterBalance>(id));
   }
-  // TODO 加载本机IP
+  // 加载本机IP
+  // 3. 加载本地ip
+  char my_host_name[1024];
+  if (gethostname(my_host_name, 1024) == 0) {
+    struct hostent *hd = gethostbyname(my_host_name);
+
+    if (hd) {
+      struct sockaddr_in myaddr;
+      myaddr.sin_addr = *(struct in_addr *)hd->h_addr;
+      lb_config.local_ip = ntohl(myaddr.sin_addr.s_addr);
+    }
+  }
+
+  if (!lb_config.local_ip) {
+    struct in_addr inaddr;
+    inet_aton("127.0.0.1", &inaddr);
+    lb_config.local_ip = ntohl(inaddr.s_addr);
+  }
 }

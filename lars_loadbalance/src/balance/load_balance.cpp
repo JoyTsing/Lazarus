@@ -233,7 +233,7 @@ void LoadBalance::commit_report() {
   request.set_modid(_modid);
   request.set_cmdid(_cmdid);
   request.set_timestamp(time(nullptr));
-  request.set_caller(1145141919);  // TODO
+  request.set_caller(loadbalance::base::lb_config.local_ip);
   // 2. report _idle_list
   for (auto hostinfo : _idle_list) {
     lars::HostCallResult call_res;

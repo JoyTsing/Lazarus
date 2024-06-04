@@ -6,14 +6,15 @@
 #include <vector>
 
 namespace lazarus {
-
+using ip_port = std::pair<std::string, short>;
+using router_set = std::vector<ip_port>;
 class LazarusClient {
  public:
   LazarusClient();
   ~LazarusClient();
 
   /**
-   * @brief Get the hosts object
+   * @brief Get the host object
    *
    * @param modid
    * @param cmdid
@@ -21,7 +22,9 @@ class LazarusClient {
    * @param port
    * @return int lars::ReturnCode
    */
-  int get_hosts(int modid, int cmdid, std::string& ip, short& port);
+  int get_host(int modid, int cmdid, std::string& ip, short& port);
+
+  int get_routers(int modid, int cmdid, router_set& routers);
 
   /**
    * @brief report the calls status

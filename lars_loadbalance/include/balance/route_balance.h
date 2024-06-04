@@ -32,6 +32,16 @@ class RouterBalance {
   int get_host(int modid, int cmdid, lars::GetHostResponse& response);
 
   /**
+   * @brief Get the router object
+   *
+   * @param modid
+   * @param cmdid
+   * @param response
+   * @return int lars::ReturnCode
+   */
+  int get_router(int modid, int cmdid, lars::GetRouterResponse& response);
+
+  /**
    * @brief Update the router_map from response
    *
    * @param modid

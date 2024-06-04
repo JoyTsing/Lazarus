@@ -43,7 +43,7 @@ int main(int argc, const char** argv) {
   // key ->ip ;value -> <suc_cnt,err_cnt>
   std::unordered_map<std::string, std::pair<std::uint32_t, std::uint32_t>> mp;
   for (int i = 0; i < query_cnt; i++) {
-    ret = client->get_hosts(modid, cmdid, ip, port);
+    ret = client->get_host(modid, cmdid, ip, port);
     if (ret == 0) {
       if (mp.find(ip) == mp.end()) {
         mp[ip] = std::make_pair(0, 0);

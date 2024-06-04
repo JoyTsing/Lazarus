@@ -4,13 +4,15 @@ package lars;
 
 /* Lars系统的消息ID */
 enum MessageId {
-  ID_UNKNOW = 0;              // 占位
-  ID_GetRouterRequest = 1;    // lb agent向DNS请求Router对应的关系的消息ID
-  ID_GetRouterResponse = 2;   // DNS server回复给Agent结果的消息
-  ID_ReportStatusRequest = 3; // lb agent上报主机调用状态信息请求消息ID
-  ID_GetHostRequest = 4;      // API给lb agent请求主机的消息ID
-  ID_GetHostResponse = 5;     // lb agent回复API请求的主机的消息ID
-  ID_ReportRequest = 6;       // API给lb agent的report请求
+  ID_UNKNOW = 0;                // 占位
+  ID_GetRouterRequest = 1;      // lb agent向DNS请求Router对应的关系的消息ID
+  ID_GetRouterResponse = 2;     // DNS server回复给Agent结果的消息
+  ID_ReportStatusRequest = 3;   // lb agent上报主机调用状态信息请求消息ID
+  ID_GetHostRequest = 4;        // API给lb agent请求主机的消息ID
+  ID_GetHostResponse = 5;       // lb agent回复API请求的主机的消息ID
+  ID_ReportRequest = 6;         // API给lb agent的report请求
+  ID_API_GetRouterRequest = 7;  // API给lb agent获取modid/cmdid全部router信息
+  ID_API_GetRouterResponse = 8; // lb agent给API获取modid/cmdid全部router信息
 }
 
 enum ReturnCode {
@@ -27,7 +29,7 @@ message HostInfo {
 }
 
 /**
- * ID_GetRouterRequest
+ * ID_GetRouterRequest、ID_API_GetRouterRequest
  * 请求dns路由信息的消息
  */
 message GetRouterRequest {
@@ -36,7 +38,7 @@ message GetRouterRequest {
 }
 
 /**
- * ID_GetRouterResponse
+ * ID_GetRouterResponse、ID_API_GetRouterResponse
  * DNS回复的消息
  */
 message GetRouterResponse {
