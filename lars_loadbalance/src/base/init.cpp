@@ -31,7 +31,7 @@ void loadbalance::resource_init() {
   lb_config.continue_error_num = config_file::instance()->GetNumber(
       "loadbalance", "continue_error_num", 10);
   lb_config.continue_success_num = config_file::instance()->GetNumber(
-      "loadbalance", "continue_success_num", 10);
+      "loadbalance", "continue_success_num", 5);
   // 初始化队列
   reporter_queue = std::make_shared<ThreadQueue<lars::ReportStatusRequest>>();
   dns_queue = std::make_shared<ThreadQueue<lars::GetRouterRequest>>();

@@ -1,5 +1,6 @@
 #include "balance/route_balance.h"
 
+#include <cstdint>
 #include <mutex>
 
 #include "balance/load_balance.h"
@@ -64,7 +65,7 @@ void RouterBalance::report(const lars::ReportRequest& request) {
   // 1. 根据modid和cmdid找到对应的load balance
   int modid = request.modid(), cmdid = request.cmdid();
   int retcode = request.retcode();
-  int ip = request.host().ip(), port = request.host().port();
+  std::uint32_t ip = request.host().ip(), port = request.host().port();
   std::uint64_t key = ((std::uint64_t)modid << 32) + cmdid;
   // 2. load balance 处理report请求
   std::lock_guard<std::mutex> lock(_mtx);

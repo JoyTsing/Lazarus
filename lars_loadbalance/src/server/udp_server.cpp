@@ -31,11 +31,11 @@ void loadbalance::start_udp_servers() {
         i)
         .detach();
   }
+  // TODO 加载本地IP
 }
 
 void loadbalance::server::handle_get_host(MESSAGE_ROUTER_ARGS) {
   // 解析消息
-  // minilog::log_info("get host request from client");
   lars::GetHostRequest request;
   request.ParseFromArray(data, len);
   int modid = request.modid();
@@ -57,7 +57,6 @@ void loadbalance::server::handle_get_host(MESSAGE_ROUTER_ARGS) {
 }
 
 void loadbalance::server::handle_get_report(MESSAGE_ROUTER_ARGS) {
-  minilog::log_info("report request from client");
   lars::ReportRequest request;
   request.ParseFromArray(data, len);
   int index = *static_cast<int*>(user_data);

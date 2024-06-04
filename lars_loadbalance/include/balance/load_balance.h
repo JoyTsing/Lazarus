@@ -58,7 +58,7 @@ class LoadBalance {
    * @param port
    * @param retcode  // lars::ReturnCode
    */
-  void report(int ip, int port, int retcode);
+  void report(std::uint32_t ip, int port, int retcode);
 
   /**
    * @brief Commit the report to server

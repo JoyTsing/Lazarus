@@ -109,7 +109,7 @@ void LoadBalance::get_host_from_list(lars::GetHostResponse& response,
 
 bool LoadBalance::empty() { return _host_map.empty(); }
 
-void LoadBalance::report(int ip, int port, int retcode) {
+void LoadBalance::report(std::uint32_t ip, int port, int retcode) {
   uint64_t key = ((uint64_t)ip << 32) + port;
   if (_host_map.find(key) == _host_map.end()) {
     return;
@@ -189,4 +189,38 @@ void LoadBalance::report(int ip, int port, int retcode) {
   }
 }
 
-void LoadBalance::commit_report() {}
+void LoadBalance::commit_report() {
+  if (empty()) {
+    return;
+  }
+  // 1.  packaging information
+  lars::ReportStatusRequest request;
+  request.set_modid(_modid);
+  request.set_cmdid(_cmdid);
+  request.set_timestamp(time(nullptr));
+  request.set_caller(1145141919);  // TODO
+  // 2. report _idle_list
+  for (auto hostinfo : _idle_list) {
+    lars::HostCallResult call_res;
+    call_res.set_ip(hostinfo->ip);
+    call_res.set_port(hostinfo->port);
+    call_res.set_succ(hostinfo->real_succ);
+    call_res.set_fail(hostinfo->real_err);
+    call_res.set_overload(false);
+    // add to req
+    request.add_results()->CopyFrom(call_res);
+  }
+  // 3. report _overload_list
+  for (auto hostinfo : _overload_list) {
+    lars::HostCallResult call_res;
+    call_res.set_ip(hostinfo->ip);
+    call_res.set_port(hostinfo->port);
+    call_res.set_succ(hostinfo->real_succ);
+    call_res.set_fail(hostinfo->real_err);
+    call_res.set_overload(true);
+    // add to req
+    request.add_results()->CopyFrom(call_res);
+  }
+  // 4.send
+  loadbalance::base::reporter_queue->send(request);
+}

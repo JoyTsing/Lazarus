@@ -37,7 +37,6 @@ LazarusClient::LazarusClient() : _seqid(0) {
       exit(1);
     }
   }
-  minilog::log_info("connect to server success");
 }
 
 LazarusClient::~LazarusClient() {
@@ -104,7 +103,8 @@ int LazarusClient::get_hosts(int modid, int cmdid, std::string& ip,
   if (response.retcode() == lars::RET_SUCC) {
     lars::HostInfo host = response.hosts();
     in_addr addr;
-    addr.s_addr = ntohl(host.ip());
+    std::uint32_t host_ip = ntohl(host.ip());
+    addr.s_addr = host_ip;
     ip = inet_ntoa(addr);
     port = host.port();
   }
@@ -123,7 +123,7 @@ void LazarusClient::report(int modid, int cmdid, std::string_view ip,
   auto host = request.mutable_host();
   in_addr addr;
   inet_aton(ip.data(), &addr);
-  int ip_int = addr.s_addr;
+  int ip_int = htonl(addr.s_addr);
   host->set_ip(ip_int);
   host->set_port(port);
   // 2. send the request
