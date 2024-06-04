@@ -29,7 +29,7 @@ int main(int argc, const char** argv) {
   }
   ret = client->get_host(modid, cmdid, ip, port);
   if (ret == lars::RET_SUCC) {
-    minilog::log_info("get host is {}, port is {}", ip, port);
+    minilog::log_info("get one host is {}, port is {}", ip, port);
     // do something
     client->report(modid, cmdid, ip, port, overload);
     // report

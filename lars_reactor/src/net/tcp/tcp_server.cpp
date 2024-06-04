@@ -82,10 +82,10 @@ TcpServer::TcpServer(EventLoop *loop, const char *ip, std::uint16_t port)
 
   // init connection number
   _max_conns =
-      config_file::instance()->GetNumber("reactor", "maxConnection", 512);
+      config_file::instance()->GetNumber("reactor", "maxConnection", 20000);
   // init thread pool
   int thread_num =
-      config_file::instance()->GetNumber("reactor", "threadNum", 5);
+      config_file::instance()->GetNumber("reactor", "threadNum", 20);
   _threadpool = new ThreadPool(thread_num);
   // 注册socket读事件accept到eventLoop
   _loop->add_io_event(

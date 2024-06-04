@@ -25,7 +25,7 @@ int main(int argc, const char **argv) {
   config_file::setPath("./conf/server.conf");
 
   std::string ip =
-      config_file::instance()->GetString("reactor", "ip", "0.0.0.0");
+      config_file::instance()->GetString("reactor", "ip", "127.0.0.1");
   short port = config_file::instance()->GetNumber("reactor", "port", 7777);
 
   TcpServer server(&loop, ip.c_str(), port);
