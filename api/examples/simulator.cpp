@@ -17,7 +17,7 @@ using namespace lazarus;
 
 void usage() {
   printf(
-      "Usage: ./example [modid] [cmdid] [errRate(0-10)] [query "
+      "Usage: ./simulator [modid] [cmdid] [errRate(0-10)] [query "
       "cnt(0-999999)]\n");
 }
 

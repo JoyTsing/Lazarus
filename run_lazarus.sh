@@ -1,11 +1,11 @@
 #!/bin/bash
 
-LARS_REPORTER_PATH="$(pwd)/lars_reporter/build/src"
-LARS_DNS_PATH="$(pwd)/lars_dns/build/src"
-LARS_LBAGENT_PATH="$(pwd)/lars_loadbalance/build/src"
-LARS_WEB_PATH="$(pwd)/lars_web"
-LARS_API_EXAMPLE_PATH="$(pwd)/api/build/examples"
-LARS_REACTOR_QPS_TEST_PATH="$(pwd)/lars_reactor/build/examples/qps_test"
+LARS_REPORTER_PATH="./lars_reporter/build/src"
+LARS_DNS_PATH="./lars_dns/build/src"
+LARS_LBAGENT_PATH="./lars_loadbalance/build/src"
+LARS_WEB_PATH="./lars_web"
+LARS_API_EXAMPLE_PATH="./api/build/examples"
+LARS_REACTOR_QPS_TEST_PATH="./lars_reactor/build/examples/qps_test"
 
 usage() {
   echo ""
@@ -40,9 +40,8 @@ if [ "$1" = "test" ]; then
     $LARS_API_EXAMPLE_PATH/qps $3
   fi
 elif [ "$1" = "reactor" ]; then
-  cd $LARS_REACTOR_QPS_TEST_PATH || echo "no such directory"
+  cd $LARS_REACTOR_QPS_TEST_PATH
   if [ "$2" = "server" ]; then
-    pwd
     ./qps_server
   elif [ "$2" = "qps" ]; then
     ./qps_client $3
