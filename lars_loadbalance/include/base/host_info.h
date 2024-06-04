@@ -23,8 +23,9 @@ class HostInfo {
   std::uint32_t real_succ;  // 真实运行成功个数, 给Reporter上报用户观察
   std::uint32_t real_err;   // 真实运行失败个数，给Reporter上报用户观察
 
-  std::uint32_t continue_succ;  // 连续成功次数
-  std::uint32_t continue_err;   // 连续失败次数
-
-  bool overload;  // 是否过载
+  std::uint32_t continue_succ;       // 连续成功次数
+  std::uint32_t continue_err;        // 连续失败次数
+  std::uint64_t idle_timestamp;      // 成为idle时间戳
+  std::uint64_t overload_timestamp;  // 成为overload时间戳
+  bool overload;                     // 是否过载
 };

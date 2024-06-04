@@ -54,17 +54,17 @@ int main(int argc, const char** argv) {
         // report error
         mp[ip].second++;
         client->report(modid, cmdid, ip, port, lars::RET_OVERLOAD);
-        minilog::log_info("error");
+        // minilog::log_info("error");
       } else {
         // report success
         mp[ip].first++;
         client->report(modid, cmdid, ip, port, lars::RET_SUCC);
-        minilog::log_info("success");
+        // minilog::log_info("success");
       }
     } else if (ret == lars::RET_NOEXIST) {
       minilog::log_info("modid {},cmdid {} no exist", modid, cmdid);
     } else if (ret == lars::RET_OVERLOAD) {
-      minilog::log_info("all host overload");
+      // minilog::log_info("all host overload");
     } else if (ret == lars::RET_SYSTEM_ERR) {
       minilog::log_info("SYSTEM error");
     }

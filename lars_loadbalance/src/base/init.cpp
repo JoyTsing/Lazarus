@@ -32,10 +32,15 @@ void loadbalance::resource_init() {
       "loadbalance", "continue_error_num", 10);
   lb_config.continue_success_num = config_file::instance()->GetNumber(
       "loadbalance", "continue_success_num", 5);
+  lb_config.idle_timeout =
+      config_file::instance()->GetNumber("loadbalance", "idle_timeout", 15);
+  lb_config.overload_timeout =
+      config_file::instance()->GetNumber("loadbalance", "overload_timeout", 10);
   // 初始化队列
   reporter_queue = std::make_shared<ThreadQueue<lars::ReportStatusRequest>>();
   dns_queue = std::make_shared<ThreadQueue<lars::GetRouterRequest>>();
   for (int id = 1; id <= 3; id++) {
     route_balances.push_back(std::make_shared<RouterBalance>(id));
   }
+  // TODO 加载本机IP
 }

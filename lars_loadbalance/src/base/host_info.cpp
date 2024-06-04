@@ -11,7 +11,9 @@ HostInfo::HostInfo(std::uint32_t ip, short port, int init_success)
       real_err(0),
       continue_succ(0),
       continue_err(0),
-      overload(false) {}
+      overload(false) {
+  idle_timestamp = time(NULL);
+}
 
 void HostInfo::set_idle() {
   virtual_succ = loadbalance::base::lb_config.init_success_cnt;
@@ -21,6 +23,7 @@ void HostInfo::set_idle() {
   continue_succ = 0;
   continue_err = 0;
   overload = false;
+  idle_timestamp = time(NULL);
 }
 
 void HostInfo::set_overload() {
@@ -31,4 +34,5 @@ void HostInfo::set_overload() {
   continue_succ = 0;
   continue_err = 0;
   overload = true;
+  overload_timestamp = time(NULL);
 }

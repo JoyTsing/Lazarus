@@ -109,11 +109,13 @@ void LoadBalance::get_host_from_list(lars::GetHostResponse& response,
 
 bool LoadBalance::empty() { return _host_map.empty(); }
 
+// TODO 这个函数太长了，需要拆分
 void LoadBalance::report(std::uint32_t ip, int port, int retcode) {
   uint64_t key = ((uint64_t)ip << 32) + port;
   if (_host_map.find(key) == _host_map.end()) {
     return;
   }
+  std::uint64_t current_time = time(nullptr);
   auto hostinfo = _host_map[key];
   // 1. update count
   if (retcode == lars::RET_SUCC) {
@@ -185,6 +187,26 @@ void LoadBalance::report(std::uint32_t ip, int port, int retcode) {
       _overload_list.remove(hostinfo);
       _idle_list.push_back(hostinfo);
       return;
+    }
+  }
+  // 3. 周期检查
+  if (hostinfo->overload == false) {
+    // idle
+    if (current_time - hostinfo->idle_timestamp >=
+        (std::uint64_t)loadbalance::base::lb_config.idle_timeout) {
+      // 重置
+      minilog::log_info("[modid {}:cmdid {}] idle reset", _modid, _cmdid);
+      hostinfo->set_idle();
+    }
+  } else {
+    // overload
+    if (current_time - hostinfo->overload_timestamp >=
+        (std::uint64_t)loadbalance::base::lb_config.overload_timeout) {
+      // 重置
+      minilog::log_info("[modid {}:cmdid {}] overload reset", _modid, _cmdid);
+      hostinfo->set_idle();
+      _overload_list.remove(hostinfo);
+      _idle_list.push_back(hostinfo);
     }
   }
 }

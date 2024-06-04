@@ -23,6 +23,12 @@ struct LBConfig {
   int continue_error_num;
   // 连续成功次数超过这个值就认为是idle节点
   int continue_success_num;
+  // 清理idle窗口的周期
+  int idle_timeout;
+  // 在overload列表等待的最大时间
+  int overload_timeout;
+  // 当前agent本地ip地址(用于上报 填充caller字段)
+  uint32_t local_ip;
 };
 namespace base {
 // 所需要的队列
