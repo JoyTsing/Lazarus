@@ -53,6 +53,6 @@ foreach(v ${all_tests})
   string(REGEX REPLACE "examples/qps_test/" "" target_name ${relative_path})
   string(REGEX REPLACE ".cpp" "" target_name ${target_name})
 
-  add_executable(${target_name} EXCLUDE_FROM_ALL ${v} ${GENERATED_PROTOBUF_FILES})
+  add_executable(${target_name} ${v} ${GENERATED_PROTOBUF_FILES})
   target_link_libraries(${target_name} PUBLIC protobuf::libprotobuf reactor Backward::Backward Backward::Object)
 endforeach()
