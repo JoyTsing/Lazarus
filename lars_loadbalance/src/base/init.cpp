@@ -36,6 +36,8 @@ void loadbalance::resource_init() {
       config_file::instance()->GetNumber("loadbalance", "idle_timeout", 15);
   lb_config.overload_timeout =
       config_file::instance()->GetNumber("loadbalance", "overload_timeout", 10);
+  lb_config.route_update_time = config_file::instance()->GetNumber(
+      "loadbalance", "route_update_time", 10);
   // 初始化队列
   reporter_queue = std::make_shared<ThreadQueue<lars::ReportStatusRequest>>();
   dns_queue = std::make_shared<ThreadQueue<lars::GetRouterRequest>>();

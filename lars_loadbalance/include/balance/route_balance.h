@@ -49,6 +49,12 @@ class RouterBalance {
    */
   void report(const lars::ReportRequest& request);
 
+  /**
+   * @brief reset the router_map
+   *
+   */
+  void reset();
+
  private:
   std::mutex _mtx;
   router_map _router_map;  // mod/cmdid和load balance的对应关系

@@ -74,6 +74,8 @@ class LoadBalance {
    */
   bool empty();
 
+  std::uint64_t get_update_time() const;
+
  private:
   /**
    * @brief Get the host from list object
@@ -93,6 +95,8 @@ class LoadBalance {
   host_list _idle_list;
   // overload
   host_list _overload_list;
-  // modid/cmdid request times
+  // modid/cmdid request count
   int _access_cnt;
+  // Last update time
+  std::uint64_t _update_time;
 };

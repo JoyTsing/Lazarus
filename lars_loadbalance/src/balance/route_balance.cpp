@@ -1,9 +1,11 @@
 #include "balance/route_balance.h"
 
 #include <cstdint>
+#include <ctime>
 #include <mutex>
 
 #include "balance/load_balance.h"
+#include "base/init.h"
 #include "lars.pb.h"
 
 RouterBalance::RouterBalance(int id) : _id(id) {}
@@ -20,11 +22,18 @@ int RouterBalance::get_host(int modid, int cmdid,
     // 3.1 根据load balance获取host
     if (lb->empty()) {
       // 没有host信息,说明可能正在拉取host信息
+      assert(lb->status == LoadBalance::Status::PULLING);
       response.set_retcode(lars::RET_NOEXIST);
     } else {
       // 获取host
       ret = lb->get_one_host(response);
       response.set_retcode(ret);
+      // 触发超时拉取
+      if (lb->status == LoadBalance::Status::NEW &&
+          time(nullptr) - lb->get_update_time() >
+              loadbalance::base::lb_config.route_update_time) {
+        lb->pull();
+      }
     }
   } else {
     // 3.1 没有找到对应的load balance
@@ -75,5 +84,12 @@ void RouterBalance::report(const lars::ReportRequest& request) {
     lb->report(ip, port, retcode);
     // 2.2 根据最终结果上报report server
     lb->commit_report();
+  }
+}
+
+void RouterBalance::reset() {
+  std::lock_guard<std::mutex> lock(_mtx);
+  for (auto [_, lb] : _router_map) {
+    lb->status = LoadBalance::Status::NEW;
   }
 }

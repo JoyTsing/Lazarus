@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <ctime>
 #include <unordered_set>
 
 #include "base/host_info.h"
@@ -13,7 +14,13 @@
 #include "utils/minilog.h"
 
 LoadBalance::LoadBalance(std::uint32_t modid, std::uint32_t cmdid)
-    : _modid(modid), _cmdid(cmdid), _access_cnt(0) {}
+    : _modid(modid),
+      _cmdid(cmdid),
+      _access_cnt(0),
+      status(Status::NEW),
+      _update_time(0) {
+  ;
+}
 
 void LoadBalance::pull() {
   // 1. dns request
@@ -23,6 +30,7 @@ void LoadBalance::pull() {
   // 2. dns response
   loadbalance::base::dns_queue->send(request);
   status = Status::PULLING;
+  minilog::log_info("pulling");
 }
 
 void LoadBalance::update(const lars::GetRouterResponse& response) {
@@ -65,6 +73,9 @@ void LoadBalance::update(const lars::GetRouterResponse& response) {
     _host_map.erase(key);
     host.reset();
   }
+  // 更新最后的update时间并且重置状态
+  _update_time = time(nullptr);
+  status = Status::NEW;
 }
 
 int LoadBalance::get_one_host(lars::GetHostResponse& response) {
@@ -108,6 +119,8 @@ void LoadBalance::get_host_from_list(lars::GetHostResponse& response,
 }
 
 bool LoadBalance::empty() { return _host_map.empty(); }
+
+std::uint64_t LoadBalance::get_update_time() const { return _update_time; }
 
 // TODO 这个函数太长了，需要拆分
 void LoadBalance::report(std::uint32_t ip, int port, int retcode) {

@@ -19,6 +19,13 @@ void loadbalance::start_dns_client() {
   }).detach();
 }
 
+void loadbalance::dns::handle_connection_init(NetConnection* conn, void* args) {
+  // 链接成功，让udp server 下的router balance重新拉取host信息
+  for (int i = 0; i < 3; i++) {
+    base::route_balances[i]->reset();
+  }
+}
+
 // 用于处理dns server回复当前modid/cmdid对应的所有host信息
 void loadbalance::dns::handle_route_recv(MESSAGE_ROUTER_ARGS) {
   lars::GetRouterResponse response;
@@ -35,7 +42,7 @@ void loadbalance::dns::handle_route_recv(MESSAGE_ROUTER_ARGS) {
 
 void loadbalance::dns::handle_dns_request(IO_EVENT_ARGUMENT) {
   std::queue<lars::GetRouterRequest> messages;
-  TCPClient *client = (TCPClient *)args;
+  TCPClient* client = (TCPClient*)args;
   base::dns_queue->recv(messages);
   while (!messages.empty()) {
     lars::GetRouterRequest request = messages.front();
@@ -62,5 +69,7 @@ void loadbalance::dns::handle_dns_client() {
   base::dns_queue->set_callback(handle_dns_request, &client);
   // 用于处理dns server的回复
   client.add_message_router(lars::ID_GetRouterResponse, handle_route_recv);
+  // dns client 链接成功回调
+  client.set_construct_hook(handle_connection_init);
   loop.event_process();
 }

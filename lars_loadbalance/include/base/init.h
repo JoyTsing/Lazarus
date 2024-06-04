@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -27,6 +28,8 @@ struct LBConfig {
   int idle_timeout;
   // 在overload列表等待的最大时间
   int overload_timeout;
+  // 更新路由时间
+  std::uint64_t route_update_time = 10;
   // 当前agent本地ip地址(用于上报 填充caller字段)
   uint32_t local_ip;
 };
