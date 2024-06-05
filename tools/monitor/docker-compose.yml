@@ -1,0 +1,35 @@
+services:
+  prometheus:
+    container_name: qps-prometheus
+    image: prom/prometheus:latest
+    #network_mode: "host"
+    volumes:
+      - ./conf/qps-prometheus.yml:/etc/prometheus/prometheus.yml
+      - /etc/localtime:/etc/localtime
+    ports:
+      - "9099:9090"
+    restart: on-failure
+
+  grafana:
+    container_name: qps-grafana
+    image: grafana/grafana:latest
+    #network_mode: "host"
+    ports:
+      - "9333:3000"
+    restart: on-failure
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./data/grafana:/var/lib/grafana
+
+  # linux node_exporter
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    restart: always
+    container_name: qps_node_exporter
+    command:
+      - '--path.rootfs=/host'
+    ports:
+      - "9111:9100"
+    volumes:
+      - /home/joytsing/arc/Lazarus/tools/docker/data/node_exporter
+

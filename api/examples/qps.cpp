@@ -1,4 +1,7 @@
 #include <netinet/in.h>
+#include <prometheus/counter.h>
+#include <prometheus/exposer.h>
+#include <prometheus/registry.h>
 #include <unistd.h>
 
 #include <cstdlib>
@@ -12,10 +15,22 @@
 
 // developer can use the library by including the header file
 using namespace lazarus;
+// monitor
+using namespace prometheus;
 
 std::once_flag print;
 int cnt;
-
+// create an http server running on port 8080
+Exposer exposer{"0.0.0.0:8088"};
+// create a metrics registry
+// @note it's the users responsibility to keep the object alive
+auto registry = std::make_shared<Registry>();
+auto& counter = BuildCounter()
+                    .Name("total_count")
+                    .Help("Number of requests and receive.")
+                    .Register(*registry);
+const std::array<std::string, 4> results = {"Success", "Overload", "Not Found",
+                                            "Error"};
 struct ID {
   ID() {
     modid = -1;
@@ -55,14 +70,20 @@ void test_qps(ID id) {
   }
 
   while (true) {
-    std::call_once(print, [&]() { id.print = true; });
+    std::call_once(print, [&]() {
+      id.print = true;
+      exposer.RegisterCollectable(registry);
+    });
     ret = client->get_host(modid, cmdid, ip, port);
     if (ret == 0 || ret == 1 || ret == 3) {  // 成功,过载，不存在 均是合法返回
       ++qps;
+      auto result = results.at(ret);
       if (ret == 0) {
+        counter.Add({{"result", result}}).Increment();
         client->report(modid, cmdid, ip, port, 0);  // 上报成功
       } else if (ret == 1) {
         client->report(modid, cmdid, ip, port, 1);  // 上报过载
+        counter.Add({{"result", result}}).Increment();
       }
     } else {
       printf("[%d,%d] get error %d\n", modid, cmdid, ret);
@@ -77,8 +98,9 @@ void test_qps(ID id) {
       last_time = current_time;
       long avg_qps = (double)total_qps / total_time_second;
       long long total_avg_qps = avg_qps * cnt;
-      printf("single qps = [%ld], average = [%ld], total QPS= [%lld]\n", qps,
-             avg_qps, total_avg_qps);
+      printf(
+          "single qps = [%ld], average = [%ld], Estimated total QPS= [%lld]\n",
+          qps, avg_qps, total_avg_qps);
       qps = 0;
     }
   }

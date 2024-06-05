@@ -9,4 +9,18 @@
         \/     \/       \/     \/                     \/ 
 ```
 
-`Lazarus`是一个简单、易用、高性能的服务间远程调用管理、调度、负载均衡系统。
+`Lazarus`是一个简单、易用、高性能的服务间远程调用管理、调度、负载均衡系统。项目需要支持C++20，同时使用了[prometheus-cpp](https://github.com/jupp0r/prometheus-cpp)、backward-cpp作为三方依赖，对于总体的qps测试可以使用tool目录下的docker-compose工具构建Prometheus+Grafana 的组合。
+
+![启动100个客户端](/img/run.jpg)
+
+![grafane](/img/grafana.png)
+
+目前测试单服务器部分本机测试在40w qps，整体框架在13w qps。
+
+## TODO
+
+* 目前数据库入库速率跟不上处理速率，存在写瓶颈
+* 存在对于配置的服务器没有进行心跳检验
+* 疑似存在内存泄漏的问题，待排查
+* 有些地方可以用更现代的写法(reactor部分)
+* 测试不够全面
