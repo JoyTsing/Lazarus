@@ -11,7 +11,7 @@
 class TCPClient : public NetConnection {
  public:
   TCPClient(EventLoop* loop, const char* ip, unsigned short port);
-
+  ~TCPClient();
   // send
   int send_message(const char* data, int len, int message_id) override;
 

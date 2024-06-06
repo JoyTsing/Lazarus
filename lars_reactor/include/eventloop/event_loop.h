@@ -18,7 +18,7 @@ using listen_fd_set = std::unordered_set<int>;
 class EventLoop {
  public:
   EventLoop();
-
+  ~EventLoop();
   /**
    * @brief
    * 阻塞循环监听事件发生,并处理epoll_wait返回的事件，同时调用对应的回调函数
@@ -42,7 +42,7 @@ class EventLoop {
   // 删除事件触发条件(EPOLLIN,EPOLLOUT)
   void del_io_event(int fd, int mask);
 
-  static constexpr const int MAX_EVENTS = 512;
+  static constexpr const int MAX_EVENTS = 1024;
 
   // 添加一个task任务到ready_tasks
   void add_task(const Task& task);

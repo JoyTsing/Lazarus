@@ -8,6 +8,7 @@
  */
 class NetConnection {
  public:
+  virtual ~NetConnection() = default;
   virtual int send_message(const char* data, int len, int message_id) = 0;
   virtual int get_fd() = 0;
   void* param;  // 用来存放一些额外的动态参数

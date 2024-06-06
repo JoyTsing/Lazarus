@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 
@@ -20,15 +21,13 @@ enum class MEM_CAP : std::uint32_t {
 
 inline const int mem_cap_to_int(MEM_CAP cap) { return static_cast<int>(cap); }
 
-const constexpr std::uint64_t MEM_LIMIT = 5368709120;  // 5G，单位为B
+const constexpr std::uint64_t MEM_LIMIT =
+    8368709120;  // 最初为5G，单位为B，再加3个G
 
 class BufferPool {
  public:
-  BufferPool(const BufferPool&) = delete;
-  BufferPool& operator=(const BufferPool&) = delete;
-
-  static BufferPool* instance() {
-    static BufferPool* _instance = new BufferPool();
+  static std::shared_ptr<BufferPool> instance() {
+    static auto _instance = std::shared_ptr<BufferPool>(new BufferPool);
     return _instance;
   }
 
@@ -41,6 +40,10 @@ class BufferPool {
 
  private:
   BufferPool();
+
+  BufferPool(const BufferPool&) = delete;
+  BufferPool& operator=(const BufferPool&) = delete;
+
   void init_buffer_unit(int size, MEM_CAP page_size);
 
  private:

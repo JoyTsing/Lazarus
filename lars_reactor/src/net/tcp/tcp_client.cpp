@@ -30,6 +30,8 @@ TCPClient::TCPClient(EventLoop* loop, const char* ip, unsigned short port)
   this->handle_connect();
 }
 
+TCPClient::~TCPClient() { clear(); }
+
 int TCPClient::send_message(const char* data, int len, int message_id) {
   bool active_epollout = false;
   if (_output_buf.length() == 0) {

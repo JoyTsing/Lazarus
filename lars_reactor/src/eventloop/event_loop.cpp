@@ -1,6 +1,7 @@
 #include "eventloop/event_loop.h"
 
 #include <sys/epoll.h>
+#include <unistd.h>
 
 #include <cassert>
 #include <cstddef>
@@ -14,6 +15,13 @@ EventLoop::EventLoop() {
     minilog::log_error("EventLoop::EventLoop epoll_create1 failed");
     exit(1);
   }
+}
+
+EventLoop::~EventLoop() {
+  for (auto fd : _listen_fds) {
+    del_io_event(fd);
+  }
+  close(_epoll_fd);
 }
 
 void EventLoop::event_process() {
