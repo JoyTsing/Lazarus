@@ -20,7 +20,7 @@ using namespace prometheus;
 
 std::once_flag print;
 int cnt;
-// create an http server running on port 8080
+// create an http server running on port 8088
 Exposer exposer{"0.0.0.0:8088"};
 // create a metrics registry
 // @note it's the users responsibility to keep the object alive
