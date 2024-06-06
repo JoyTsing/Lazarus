@@ -11,7 +11,7 @@
 #include "utils/minilog.h"
 
 // 全局的server
-extern TcpServer* server;
+extern std::unique_ptr<TcpServer> server;
 
 SubscribeList::SubscribeList() {}
 

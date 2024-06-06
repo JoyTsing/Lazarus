@@ -3,6 +3,7 @@
 #include <mysql/mysql.h>
 
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
@@ -25,9 +26,9 @@ using router_map_iter = router_map::iterator;
  */
 class Router {
  public:
-  static Router* instance() {
-    static Router* instance = new Router();
-    return instance;
+  static std::shared_ptr<Router> instance() {
+    static auto instance_ = std::shared_ptr<Router>(new Router);
+    return instance_;
   }
 
   host_set get_hosts(int modid, int cmdid);
@@ -76,7 +77,7 @@ class Router {
 
  private:
   std::mutex _mutex;
-  MYSQL _db_connection;
+  std::shared_ptr<MYSQL> _db_connection;
 
   std::uint64_t _version;
 

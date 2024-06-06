@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
@@ -21,9 +22,9 @@ using publish_map = std::unordered_map<int, std::unordered_set<std::uint64_t>>;
 
 class SubscribeList {
  public:
-  static SubscribeList* instance() {
-    static SubscribeList* instance = new SubscribeList();
-    return instance;
+  static std::shared_ptr<SubscribeList> instance() {
+    static auto instance_ = std::shared_ptr<SubscribeList>(new SubscribeList);
+    return instance_;
   }
 
   /**

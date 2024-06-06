@@ -24,20 +24,20 @@ bool Router::check_version() {
   // query from db
   // select * from Version;
   std::string_view query_sql = "SELECT version FROM RouteVersion WHERE id=1;";
-  if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
-      0) {
+  if (mysql_real_query(_db_connection.get(), query_sql.data(),
+                       query_sql.size()) != 0) {
     minilog::log_fatal("mysql_real_query failed: {}",
-                       mysql_error(&_db_connection));
+                       mysql_error(_db_connection.get()));
     exit(1);
   }
   // get result
 
-  auto result = std::shared_ptr<MYSQL_RES>(mysql_store_result(&_db_connection),
-                                           mysql_free_result);
+  auto result = std::shared_ptr<MYSQL_RES>(
+      mysql_store_result(_db_connection.get()), mysql_free_result);
   std::uint64_t num_rows = mysql_num_rows(result.get());
   if (num_rows != 1) {
     minilog::log_fatal("No version in RouteVersion table :%s",
-                       mysql_error(&_db_connection));
+                       mysql_error(_db_connection.get()));
     exit(1);
   }
   MYSQL_ROW row = mysql_fetch_row(result.get());
@@ -56,16 +56,16 @@ void Router::load_changes(std::vector<std::uint64_t>& change_list) {
   // query from db
   std::string query_sql = std::format(
       "SELECT modid,cmdid from RouteChange WHERE version>= {};", _version);
-  if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
-      0) {
+  if (mysql_real_query(_db_connection.get(), query_sql.data(),
+                       query_sql.size()) != 0) {
     minilog::log_fatal("mysql_real_query failed: {}",
-                       mysql_error(&_db_connection));
+                       mysql_error(_db_connection.get()));
     exit(1);
   }
 
   // get result
-  auto result = std::shared_ptr<MYSQL_RES>(mysql_store_result(&_db_connection),
-                                           mysql_free_result);
+  auto result = std::shared_ptr<MYSQL_RES>(
+      mysql_store_result(_db_connection.get()), mysql_free_result);
   std::uint64_t num_rows = mysql_num_rows(result.get());
   if (num_rows == 0) {
     // minilog::log_info("No change in RouteChange table");
@@ -90,15 +90,15 @@ void Router::load_router_map(bool is_bak) {
   // query from db
   // select * from RouteData;
   std::string_view query_sql = "SELECT * from RouteData;";
-  if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
-      0) {
+  if (mysql_real_query(_db_connection.get(), query_sql.data(),
+                       query_sql.size()) != 0) {
     minilog::log_fatal("mysql_real_query failed: {}",
-                       mysql_error(&_db_connection));
+                       mysql_error(_db_connection.get()));
     exit(1);
   }
   // get result
-  auto result = std::shared_ptr<MYSQL_RES>(mysql_store_result(&_db_connection),
-                                           mysql_free_result);
+  auto result = std::shared_ptr<MYSQL_RES>(
+      mysql_store_result(_db_connection.get()), mysql_free_result);
   std::uint64_t num_rows = mysql_num_rows(result.get());
   MYSQL_ROW row;
   // clear _router_map_bak
@@ -137,10 +137,10 @@ void Router::remove_changes(bool remove_all) {
     query_sql =
         std::format("DELETE FROM RouteChange WHERE version <= {}", _version);
   }
-  if (mysql_real_query(&_db_connection, query_sql.data(), query_sql.size()) !=
-      0) {
+  if (mysql_real_query(_db_connection.get(), query_sql.data(),
+                       query_sql.size()) != 0) {
     minilog::log_fatal("mysql_real_query failed: {}",
-                       mysql_error(&_db_connection));
+                       mysql_error(_db_connection.get()));
     exit(1);
   }
 }
@@ -157,19 +157,19 @@ void Router::connect_db() {
   std::string db_name =
       config_file::instance()->GetString("mysql", "db_name", "lars_dns");
   // init
-  mysql_init(&_db_connection);
+  _db_connection = std::shared_ptr<MYSQL>(mysql_init(nullptr), mysql_close);
   // reconnection
-  mysql_options(&_db_connection, MYSQL_OPT_CONNECT_TIMEOUT, "30");
+  mysql_options(_db_connection.get(), MYSQL_OPT_CONNECT_TIMEOUT, "30");
   // WARNING: MYSQL_OPT_RECONNECT is deprecated and will be removed in a
   // future version.
   bool reconnect = true;
-  mysql_options(&_db_connection, MYSQL_OPT_RECONNECT, &reconnect);
+  mysql_options(_db_connection.get(), MYSQL_OPT_RECONNECT, &reconnect);
   // connect
-  if (!mysql_real_connect(&_db_connection, db_host.c_str(), db_user.c_str(),
-                          db_passwd.c_str(), db_name.c_str(), db_port, NULL,
-                          0)) {
+  if (!mysql_real_connect(_db_connection.get(), db_host.c_str(),
+                          db_user.c_str(), db_passwd.c_str(), db_name.c_str(),
+                          db_port, NULL, 0)) {
     minilog::log_error("mysql_real_connect failed: {}",
-                       mysql_error(&_db_connection));
+                       mysql_error(_db_connection.get()));
     exit(1);
   }
   // minilog::log_info("connect to mysql success");
